@@ -4,6 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pl.booklist.model.Book;
 
+import java.util.List;
+
 
 /**
  * Repository interface for accessing and managing {@link Book} entities.
@@ -15,4 +17,10 @@ import pl.booklist.model.Book;
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long> {
 
+    /**
+     * Retrieves all books that are marked as owned by the user.
+     *
+     * @return list of books with owned = true.
+     */
+    List<Book> findByOwnedTrue();
 }
