@@ -52,17 +52,6 @@ public class BookDTO {
     }
 
     /**
-     * Constructs a BookDTO from a Book entity.
-     *
-     * @param book the Book entity to copy from
-     */
-    public BookDTO(pl.booklist.model.Book source) {
-        this.title = source.getTitle();
-        this.author = source.getAuthor();
-        this.owned = source.isOwned();
-    }
-
-    /**
      * Returns the title of the book.
      *
      * @return the book title
