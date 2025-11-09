@@ -30,7 +30,7 @@ public class BookService {
     /**
      * Retrieves all books from the database.
      *
-     * @return a list of all {@link Book} entities
+     * @return a list of all {@link Book} entities.
      */
     public List<Book> findAllBooks() {
         return bookRepository.findAll();
@@ -43,5 +43,14 @@ public class BookService {
      */
     public List<Book> findOwnedBooks() {
         return bookRepository.findByOwnedTrue();
+    }
+
+    /**
+     * Retrieves all books that are not marked as owned by the user.
+     *
+     * @return list of unowned {@link Book} entities.
+     */
+    public List<Book> findUnownedBooks() {
+        return bookRepository.findByOwnedFalse();
     }
 }
