@@ -51,4 +51,14 @@ public class BookController {
     public List<Book> getOwnedBooks() {
         return bookService.findOwnedBooks();
     }
+
+    /**
+     * Handles GET request to retrieve all books that are not marked as owned by the user.
+     *
+     * @return a list of unowned {@link Book} entities.
+     */
+    @GetMapping
+    public List<Book> getUnownedBooks() {
+        return bookService.findUnownedBooks();
+    }
 }
