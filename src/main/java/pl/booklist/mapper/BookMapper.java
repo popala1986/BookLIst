@@ -26,7 +26,7 @@ public class BookMapper {
         if (book == null) {
             throw new IllegalArgumentException("Book cannot be null");
         }
-        return new BookDTO(book.getTitle(),book.getAuthor(),book.isOwned());
+        return new BookDTO(book.getTitle(),book.getAuthor(),book.isOwned(), book.getCoverUrl());
     }
 
     /**
@@ -39,7 +39,7 @@ public class BookMapper {
         if (bookDTO == null) {
             throw new IllegalArgumentException("BookDTO cannot be null");
         }
-        return new Book(bookDTO.getTitle(), bookDTO.getAuthor(), bookDTO.isOwned());
+        return new Book(bookDTO.getTitle(), bookDTO.getAuthor(), bookDTO.isOwned(), bookDTO.getCoverUrl());
     }
 
     /**
