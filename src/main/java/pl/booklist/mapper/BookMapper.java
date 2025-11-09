@@ -32,7 +32,7 @@ public class BookMapper {
     /**
      * Converts a BookDTO to a Book entity.
      *
-     * @param dto the BookDTO to convert
+     * @param bookDTO the BookDTO to convert
      * @return the corresponding Book entity, or null if input is null
      */
     public static Book toEntity(BookDTO bookDTO) {
