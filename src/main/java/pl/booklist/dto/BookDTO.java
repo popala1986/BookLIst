@@ -3,13 +3,14 @@ package pl.booklist.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.util.Objects;
+
 /**
  * Data Transfer Object for transferring book data between layers.
  * Contains basic information about a book: title, author, and ownership status.
  * Used for input/output operations without exposing JPA entity internals.
  *
- * @author Pawel
- * @version 1.0
+ * @author Pawel Opala
  */
 public class BookDTO {
 
@@ -33,89 +34,82 @@ public class BookDTO {
     private boolean owned;
 
     /**
+     * URL of the book's cover image.
+     */
+    private String coverUrl;
+
+    /**
      * Default constructor.
      */
     public BookDTO() {
     }
 
     /**
-     * Constructs a new BookDTO with the specified title, author, and ownership status.
+     * Constructs a new BookDTO with the specified title, author, ownership status, and cover image URL.
      *
-     * @param title  the title of the book
-     * @param author the author of the book
-     * @param owned  true if the book is owned, false otherwise
+     * @param title     the title of the book
+     * @param author    the author of the book
+     * @param owned     true if the book is owned, false otherwise
+     * @param coverUrl  the URL of the book's cover image
      */
-    public BookDTO(String title, String author, boolean owned) {
+    public BookDTO(String title, String author, boolean owned, String coverUrl) {
         this.title = title;
         this.author = author;
         this.owned = owned;
+        this.coverUrl = coverUrl;
     }
 
-    /**
-     * Returns the title of the book.
-     *
-     * @return the book title
-     */
     public String getTitle() {
         return title;
     }
 
-    /**
-     * Sets the title of the book.
-     *
-     * @param title the book title
-     */
     public void setTitle(String title) {
         this.title = title;
     }
 
-    /**
-     * Returns the author of the book.
-     *
-     * @return the book author
-     */
     public String getAuthor() {
         return author;
     }
 
-    /**
-     * Sets the author of the book.
-     *
-     * @param author the book author
-     */
     public void setAuthor(String author) {
         this.author = author;
     }
 
-    /**
-     * Returns whether the book is owned.
-     *
-     * @return true if owned, false otherwise
-     */
     public boolean isOwned() {
         return owned;
     }
 
-    /**
-     * Sets the ownership status of the book.
-     *
-     * @param owned true if owned, false otherwise
-     */
     public void setOwned(boolean owned) {
         this.owned = owned;
     }
 
-    /**
-     * Returns a string representation of the BookDTO.
-     *
-     * @return a string with book details
-     */
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        BookDTO bookDTO = (BookDTO) o;
+        return owned == bookDTO.owned && Objects.equals(title, bookDTO.title) && Objects.equals(author, bookDTO.author) && Objects.equals(coverUrl, bookDTO.coverUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, author, owned, coverUrl);
+    }
+
     @Override
     public String toString() {
         return "BookDTO{" +
                 "title='" + title + '\'' +
                 ", author='" + author + '\'' +
                 ", owned=" + owned +
+                ", coverUrl='" + coverUrl + '\'' +
                 '}';
     }
 }
