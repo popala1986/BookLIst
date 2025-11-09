@@ -61,17 +61,6 @@ public class Book {
     }
 
     /**
-     * Constructs a new Book instance by copying another Book.
-     *
-     * @param source the book instance to copy
-     */
-    public Book(Book source) {
-        this.title = source.title;
-        this.author = source.author;
-        this.owned = source.owned;
-    }
-
-    /**
      * Default constructor required by JPA.
      */
     public Book() {
