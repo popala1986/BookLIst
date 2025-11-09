@@ -23,4 +23,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
      * @return list of books with owned = true.
      */
     List<Book> findByOwnedTrue();
+
+    /**
+     * Retrieves all books that are not marked as owned by the user.
+     *
+     * @return list of books with owned = false.
+     */
+    List<Book> findByOwnedFalse();
 }
