@@ -38,7 +38,17 @@ public class BookController {
      * @return a list of all {@link Book} entities from the database.
      */
     @GetMapping("/showAllBooks")
-    public List<Book> findAll() {
+    public List<Book> getAllBooks() {
         return bookService.findAllBooks();
+    }
+
+    /**
+     * Handles GET request to retrieve all books marked as owned by the user.
+     *
+     * @return a list of owned {@link Book} entities.
+     */
+    @GetMapping("/my-books")
+    public List<Book> getOwnedBooks() {
+        return bookService.findOwnedBooks();
     }
 }
