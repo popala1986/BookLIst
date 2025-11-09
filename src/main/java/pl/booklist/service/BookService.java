@@ -35,4 +35,13 @@ public class BookService {
     public List<Book> findAllBooks() {
         return bookRepository.findAll();
     }
+
+    /**
+     * Retrieves all books that are marked as owned by the user.
+     *
+     * @return a list of owned {@link Book} entities
+     */
+    public List<Book> findOwnedBooks() {
+        return bookRepository.findByOwnedTrue();
+    }
 }
