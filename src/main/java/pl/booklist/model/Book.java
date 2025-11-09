@@ -48,16 +48,24 @@ public class Book {
     private boolean owned;
 
     /**
+     * URL of the book's cover image, typically fetched from Google Books API.
+     */
+    @Column(name = "cover_url")
+    private String coverUrl;
+
+    /**
      * Constructs a new Book instance with the specified title, author, and ownership status.
      *
-     * @param title the title of the book
+     * @param title  the title of the book
      * @param author the author of the book
-     * @param owned true if the book is owned, false otherwise
+     * @param owned  true if the book is owned, false otherwise
      */
-    public Book(String title, String author, boolean owned) {
+    public Book(String title, String author, boolean owned, String coverUrl) {
+        this.id = id;
         this.title = title;
         this.author = author;
         this.owned = owned;
+        this.coverUrl = coverUrl;
     }
 
     /**
@@ -66,65 +74,38 @@ public class Book {
     public Book() {
     }
 
-    /**
-     * Returns the unique identifier of the book.
-     *
-     * @return the book ID
-     */
     public Long getId() {
         return id;
     }
 
-    /**
-     * Sets the unique identifier of the book.
-     *
-     * @param id the book ID
-     */
     public void setId(Long id) {
         this.id = id;
     }
 
-    /**
-     * Returns the title of the book.
-     *
-     * @return the book title
-     */
     public String getTitle() {
         return title;
     }
 
-    /**
-     * Sets the title of the book.
-     *
-     * @param title the book title
-     */
     public void setTitle(String title) {
         this.title = title;
     }
 
-    /**
-     * Sets the author of the book.
-     *
-     * @param author the book author
-     */
     public String getAuthor() {
         return author;
     }
 
-    /**
-     * Returns whether the book is owned.
-     *
-     * @return true if owned, false otherwise
-     */
     public void setAuthor(String author) {
         this.author = author;
     }
 
-    /**
-     * Sets the ownership status of the book.
-     *
-     * @param owned true if owned, false otherwise
-     */
+    public String getCoverUrl() {
+        return coverUrl;
+    }
+
+    public void setCoverUrl(String coverUrl) {
+        this.coverUrl = coverUrl;
+    }
+
     public boolean isOwned() {
         return owned;
     }
@@ -133,35 +114,18 @@ public class Book {
         this.owned = owned;
     }
 
-    /**
-     * Compares this book to another object based on ID.
-     *
-     * @param o the object to compare
-     * @return true if the IDs are equal, false otherwise
-     */
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Book)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         Book book = (Book) o;
-        return Objects.equals(id, book.id);
+        return owned == book.owned && Objects.equals(id, book.id) && Objects.equals(title, book.title) && Objects.equals(author, book.author) && Objects.equals(coverUrl, book.coverUrl);
     }
 
-    /**
-     * Returns the hash code of the book based on its ID.
-     *
-     * @return the hash code
-     */
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, title, author, owned, coverUrl);
     }
 
-    /**
-     * Returns a string representation of the book.
-     *
-     * @return a string with book details
-     */
     @Override
     public String toString() {
         return "Book{" +
@@ -169,6 +133,7 @@ public class Book {
                 ", title='" + title + '\'' +
                 ", author='" + author + '\'' +
                 ", owned=" + owned +
+                ", coverUrl='" + coverUrl + '\'' +
                 '}';
     }
 }
