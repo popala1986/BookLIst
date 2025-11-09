@@ -57,7 +57,7 @@ public class BookController {
      *
      * @return a list of unowned {@link Book} entities.
      */
-    @GetMapping
+    @GetMapping("/wishlist")
     public List<Book> getUnownedBooks() {
         return bookService.findUnownedBooks();
     }
