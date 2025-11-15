@@ -1,0 +1,57 @@
+package pl.booklist.repository;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
+import pl.booklist.model.Book;
+import java.util.List;
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@ActiveProfiles("test")
+class BookRepositoryTest {
+
+    @Autowired
+    private BookRepository bookRepository;
+
+    @Test
+    @DisplayName("GIVEN two books, WHEN findByOwnedTrue is called, THEN only one owned book is returned")
+    void shouldFindOwnedBooks() {
+        //given
+        Book ownedBook = new Book("Clean Code", "Robert C. Martin", true, "http://cover.url");
+        Book notOwnedBook = new Book("Effective Java", "Joshua Bloch", false, "http://cover.url");
+        bookRepository.save(ownedBook);
+        bookRepository.save(notOwnedBook);
+
+        //when
+        List<Book> ownedBooks = bookRepository.findByOwnedTrue();
+
+        //then
+        assertThat(ownedBooks).hasSize(1);
+        assertThat(ownedBooks.get(0).getTitle()).isEqualTo("Clean Code");
+        assertThat(ownedBooks.get(0).getAuthor()).isEqualTo("Robert C. Martin");
+        assertThat(ownedBooks.get(0).getCoverUrl()).isEqualTo("http://cover.url");
+    }
+
+    @Test
+    @DisplayName("GIVEN two books, WHEN findByOwnedFalse is called, THEN only one unowned book is returned")
+    void shouldFindNotOwnedBooks() {
+        //given
+        Book ownedBook = new Book("Clean Code", "Robert C. Martin", true, "http://cover.url");
+        Book notOwnedBook = new Book("Effective Java", "Joshua Bloch", false, "http://cover.url");
+        bookRepository.save(ownedBook);
+        bookRepository.save(notOwnedBook);
+
+        //when
+        List<Book > notOwnedBooks = bookRepository.findByOwnedFalse();
+
+        //then
+        assertThat(notOwnedBooks).hasSize(1);
+        assertThat(notOwnedBooks.get(0).getTitle()).isEqualTo("Effective Java");
+        assertThat(notOwnedBooks.get(0).isOwned()).isFalse();
+        assertThat(notOwnedBooks.get(0).isOwned()).isFalse();    }
+}
