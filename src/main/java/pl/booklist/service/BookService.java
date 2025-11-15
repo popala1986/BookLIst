@@ -1,6 +1,8 @@
 package pl.booklist.service;
 
 import org.springframework.stereotype.Service;
+import pl.booklist.dto.BookDTO;
+import pl.booklist.mapper.BookMapper;
 import pl.booklist.model.Book;
 import pl.booklist.repository.BookRepository;
 
@@ -16,41 +18,32 @@ import java.util.List;
 @Service
 public class BookService {
 
+    private final BookRepository bookRepository;
+    private final BookMapper bookMapper; // wstrzyknięty bean MapStruct
 
-    private  final BookRepository bookRepository;
-
-    /**
-     * Constructs a new BookService with the given repository.
-     * @param bookRepository the repository used for book persistence.
-     */
-    public BookService(BookRepository bookRepository) {
+    public BookService(BookRepository bookRepository, BookMapper bookMapper) {
         this.bookRepository = bookRepository;
+        this.bookMapper = bookMapper;
     }
 
-    /**
-     * Retrieves all books from the database.
-     *
-     * @return a list of all {@link Book} entities.
-     */
-    public List<Book> findAllBooks() {
-        return bookRepository.findAll();
+    public List<BookDTO> findAllBooks() {
+        List<Book> books = bookRepository.findAll();
+        return books.stream()
+                .map(bookMapper::toDto)
+                .toList();
     }
 
-    /**
-     * Retrieves all books that are marked as owned by the user.
-     *
-     * @return a list of owned {@link Book} entities
-     */
-    public List<Book> findOwnedBooks() {
-        return bookRepository.findByOwnedTrue();
+    public List<BookDTO> findOwnedBooks() {
+        List<Book> books = bookRepository.findByOwnedTrue();
+        return books.stream()
+                .map(bookMapper::toDto)
+                .toList();
     }
 
-    /**
-     * Retrieves all books that are not marked as owned by the user.
-     *
-     * @return list of unowned {@link Book} entities.
-     */
-    public List<Book> findUnownedBooks() {
-        return bookRepository.findByOwnedFalse();
+    public List<BookDTO> findUnownedBooks() {
+        List<Book> books = bookRepository.findByOwnedFalse();
+        return books.stream()
+                .map(bookMapper::toDto)
+                .toList();
     }
 }
