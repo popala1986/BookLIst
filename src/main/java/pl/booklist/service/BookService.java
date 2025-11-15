@@ -19,7 +19,7 @@ import java.util.List;
 public class BookService {
 
     private final BookRepository bookRepository;
-    private final BookMapper bookMapper; // wstrzyknięty bean MapStruct
+    private final BookMapper bookMapper; //
 
     public BookService(BookRepository bookRepository, BookMapper bookMapper) {
         this.bookRepository = bookRepository;
