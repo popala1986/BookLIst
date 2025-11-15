@@ -27,7 +27,7 @@ class BookValidationTest {
     @Test
     @DisplayName("valid book should pass validation")
     void validBookShouldPassValidation() {
-        Book book = new Book("Clean Code", "Robert C. Martin", true, "http://cover.url");
+        Book book = new Book(null,"Clean Code", "Robert C. Martin", true, "http://cover.url");
         Set<ConstraintViolation<Book>> violations = validator.validate(book);
 
         assertTrue(violations.isEmpty(), "Expected no validation errors for a valid book");
@@ -36,7 +36,7 @@ class BookValidationTest {
     @Test
     @DisplayName("Blank title should fail validation")
     void blankTitleShouldFailValidation() {
-        Book book = new Book("", "Robert C. Martin", true, "http://cover.url");
+        Book book = new Book(null,"", "Robert C. Martin", true, "http://cover.url");
 
         Set<ConstraintViolation<Book>> violations = validator.validate(book);
 
@@ -50,7 +50,7 @@ class BookValidationTest {
     @Test
     @DisplayName("Null author should fail validation")
     void nullAuthorShouldFailValidation() {
-        Book book = new Book("Robinson Kruzoe", null, true, "http://cover.url");
+        Book book = new Book(null,"Robinson Kruzoe", null, true, "http://cover.url");
 
         Set<ConstraintViolation<Book>> violations = validator.validate(book);
 
@@ -65,7 +65,7 @@ class BookValidationTest {
 @DisplayName("Too long author should fail validation")
 void tooLongAuthorShouldFailValidation() {
     String longAuthor = "Robinson Kruzoe".repeat(20); // > 100 characters
-    Book book = new Book("Clean Code", longAuthor, true, "http://cover.url");
+    Book book = new Book(null,"Clean Code", longAuthor, true, "http://cover.url");
 
     Set<ConstraintViolation<Book>> violations = validator.validate(book);
 
@@ -80,7 +80,7 @@ void tooLongAuthorShouldFailValidation() {
     @Test
     @DisplayName("Invalid URL should fail validation (only if @URL is used)")
     void invalidUrlShouldFailValidation() {
-        Book book = new Book("Valid Title", "Valid Author", true, "invalid-url");
+        Book book = new Book(null,"Valid Title", "Valid Author", true, "invalid-url");
 
         Set<ConstraintViolation<Book>> violations = validator.validate(book);
 
