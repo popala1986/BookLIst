@@ -21,17 +21,18 @@ class BookRepositoryTest {
     @Test
     @DisplayName("GIVEN two books, WHEN findByOwnedTrue is called, THEN only one owned book is returned")
     void shouldFindOwnedBooks() {
-        //given
-        Book ownedBook = new Book("Clean Code", "Robert C. Martin", true, "http://cover.url");
-        Book notOwnedBook = new Book("Effective Java", "Joshua Bloch", false, "http://cover.url");
+        // GIVEN
+        Book ownedBook = new Book(null, "Clean Code", "Robert C. Martin", true, "http://cover.url");
+        Book notOwnedBook = new Book(null, "Effective Java", "Joshua Bloch", false, "http://cover.url");
+
         bookRepository.save(ownedBook);
         bookRepository.save(notOwnedBook);
 
-        //when
+        // WHEN
         List<Book> ownedBooks = bookRepository.findByOwnedTrue();
 
-        //then
-        assertThat(ownedBooks).hasSize(1);
+        // THEN
+        assertThat(ownedBooks).as("It should find exactly one owned book.").hasSize(1);
         assertThat(ownedBooks.get(0).getTitle()).isEqualTo("Clean Code");
         assertThat(ownedBooks.get(0).getAuthor()).isEqualTo("Robert C. Martin");
         assertThat(ownedBooks.get(0).getCoverUrl()).isEqualTo("http://cover.url");
@@ -40,18 +41,19 @@ class BookRepositoryTest {
     @Test
     @DisplayName("GIVEN two books, WHEN findByOwnedFalse is called, THEN only one unowned book is returned")
     void shouldFindNotOwnedBooks() {
-        //given
-        Book ownedBook = new Book("Clean Code", "Robert C. Martin", true, "http://cover.url");
-        Book notOwnedBook = new Book("Effective Java", "Joshua Bloch", false, "http://cover.url");
+        // GIVEN
+        Book ownedBook = new Book(null, "Clean Code", "Robert C. Martin", true, "http://cover.url");
+        Book notOwnedBook = new Book(null, "Effective Java", "Joshua Bloch", false, "http://cover.url");
+
         bookRepository.save(ownedBook);
         bookRepository.save(notOwnedBook);
 
-        //when
+        // WHEN
         List<Book > notOwnedBooks = bookRepository.findByOwnedFalse();
 
-        //then
-        assertThat(notOwnedBooks).hasSize(1);
+        // THEN
+        assertThat(notOwnedBooks).as("It should find exactly one unowned book.").hasSize(1);
         assertThat(notOwnedBooks.get(0).getTitle()).isEqualTo("Effective Java");
         assertThat(notOwnedBooks.get(0).isOwned()).isFalse();
-        assertThat(notOwnedBooks.get(0).isOwned()).isFalse();    }
+    }
 }
