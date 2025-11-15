@@ -58,11 +58,12 @@ public class Book {
     /**
      * Constructs a new Book instance with the specified title, author, and ownership status.
      *
+     * @param id the unique identifier of the book.
      * @param title  the title of the book
      * @param author the author of the book
      * @param owned  true if the book is owned, false otherwise
      */
-    public Book(String title, String author, boolean owned, String coverUrl) {
+    public Book(Long id, String title, String author, boolean owned, String coverUrl) {
         this.id = id;
         this.title = title;
         this.author = author;
