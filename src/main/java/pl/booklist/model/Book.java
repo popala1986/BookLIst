@@ -52,7 +52,6 @@ public class Book {
      * URL of the book's cover image, typically fetched from Google Books API.
      */
     @Column(name = "cover_url")
-    @URL
     private String coverUrl;
 
     /**
