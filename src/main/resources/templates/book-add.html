@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dodaj książkę</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+<h1>Dodaj książkę do listy życzeń</h1>
+
+<form th:action="@{/add}" th:object="${newBook}" method="post">
+
+    <div>
+        <label for="title">Tytuł (EN):</label>
+        <input type="text" id="title" th:field="*{title}" required>
+        <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Błąd tytułu</div>
+    </div>
+
+    <div>
+        <label for="author">Autor (EN):</label>
+        <input type="text" id="author" th:field="*{author}" required>
+        <div th:if="${#fields.hasErrors('author')}" th:errors="*{author}">Błąd autora</div>
+    </div>
+
+    <button type="submit">Dodaj do listy życzeń (i pobierz okładkę)</button>
+</form>
+
+<p><a href="/">Powrót do strony głównej</a></p>
+</body>
+</html>

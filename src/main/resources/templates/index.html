@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Moja Biblioteka Książek</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        .book-container { display: flex; flex-wrap: wrap; gap: 20px; }
+        .book-item { border: 1px solid #ccc; padding: 10px; width: 180px; text-align: center; }
+        .book-item img { width: 100%; height: auto; max-width: 150px; }
+        .default-cover { background-color: #f0f0f0; height: 200px; display: flex; align-items: center; justify-content: center; border: 1px dashed #aaa; }
+    </style>
+</head>
+<body>
+<h1>Moja Biblioteka Książek</h1>
+
+<div th:if="${message}" style="color: green; font-weight: bold;"><p th:text="${message}"></p></div>
+<div th:if="${error}" style="color: red; font-weight: bold;"><p th:text="${error}"></p></div>
+
+
+
+<p><a href="/add">➕ Dodaj nową książkę do listy życzeń</a></p>
+
+<hr/>
+
+<h2>Posiadane Książki (Mam)</h2>
+<div class="book-container">
+    <div th:each="book : ${ownedBooks}" class="book-item">
+        <img th:src="${book.coverUrl}" alt="Okładka książki">
+        <h3 th:text="${book.title}">Tytuł</h3>
+        <p th:text="${book.author}">Autor</p>
+    </div>
+</div>
+<div th:if="${#lists.isEmpty(ownedBooks)}"><p>Brak posiadanych książek.</p></div>
+
+<hr/>
+
+<h2>Lista Życzeń (Chcę mieć)</h2>
+<div class="book-container">
+    <div th:each="book : ${wishlistBooks}" class="book-item">
+        <img th:src="${book.coverUrl}" alt="Okładka książki">
+        <h3 th:text="${book.title}">Tytuł</h3>
+        <p th:text="${book.author}">Autor</p>
+    </div>
+</div>
+<div th:if="${#lists.isEmpty(wishlistBooks)}"><p>Lista życzeń jest pusta.</p></div>
+
+</body>
+</html>
