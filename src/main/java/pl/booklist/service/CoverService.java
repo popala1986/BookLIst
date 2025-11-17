@@ -10,42 +10,46 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Service responsible for fetching book cover images from external sources.
- */
 @Service
 public class CoverService {
 
     private static final Logger logger = LoggerFactory.getLogger(CoverService.class);
-    private final RestTemplate restTemplate = new RestTemplate();
 
-    /**
-     * Fetches the cover image URL for a book using Google Books API.
-     *
-     * @param title  the title of the book
-     * @param author the author of the book
-     * @return the URL of the book's cover image, or a default image if not found
-     */
+    private static final String DEFAULT_COVER_URL = "/images/default-cover.jpg";
+
+    private final RestTemplate restTemplate;
+
+    public CoverService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
     public String fetchCoverUrl(String title, String author) {
-        String query = URLEncoder.encode("intitle:" + title + "+inauthor:" + author, StandardCharsets.UTF_8);
-        String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + query;
+
+        String query = URLEncoder.encode(title + " " + author, StandardCharsets.UTF_8);
+        String apiUrl = "https://www.googleapis.com/books/v1/volumes?q=" + query + "&maxResults=1";
 
         try {
             ResponseEntity<JsonNode> response = restTemplate.getForEntity(apiUrl, JsonNode.class);
-            JsonNode items = response.getBody().get("items");
+            JsonNode root = response.getBody();
+            JsonNode items = root.get("items");
 
             if (items != null && items.size() > 0) {
-                JsonNode imageLinks = items.get(0).get("volumeInfo").get("imageLinks");
-                if (imageLinks != null && imageLinks.has("thumbnail")) {
-                    String thumbnailUrl = imageLinks.get("thumbnail").asText();
-                    logger.info("Pobrano okładkę dla książki: {} - {}", title, author);
-                    return thumbnailUrl;
+                JsonNode volumeInfo = items.get(0).get("volumeInfo");
+
+                if (volumeInfo != null) {
+                    JsonNode imageLinks = volumeInfo.get("imageLinks");
+
+                    if (imageLinks != null && imageLinks.has("thumbnail")) {
+                        String thumbnailUrl = imageLinks.get("thumbnail").asText();
+                        logger.info("Pobrano okładkę dla książki: {} - {}", title, author);
+                        return thumbnailUrl;
+                    }
                 }
             }
         } catch (Exception e) {
             logger.warn("Nie udało się pobrać okładki dla książki: {} - {}. Użyto domyślnej okładki.", title, author, e);
         }
 
-        return "/images/default-cover.jpg";
+        return DEFAULT_COVER_URL;
     }
 }
