@@ -1,41 +1,63 @@
-/* GLOBALNE USTAWIENIA */
+/* ====== GLOBALNE USTAWIENIA ====== */
+:root {
+    --primary-color: #007bff;
+    --primary-dark: #0056b3;
+    --secondary-color: #28a745;
+    --secondary-dark: #218838;
+    --danger-color: #dc3545;
+    --background-light: #f4f7f6;
+    --text-color: #333;
+    --font-family: 'Segoe UI', 'Roboto', sans-serif;
+}
+
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f7f6;
-    color: #333;
+    font-family: var(--font-family);
+    background-color: var(--background-light);
+    color: var(--text-color);
     margin: 0;
     padding: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* ====== NAGŁÓWKI ====== */
+h1, h2, h3 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    font-weight: 600;
+    text-align: center;
 }
 
 h1 {
-    color: #007bff;
-    margin-bottom: 30px;
-    border-bottom: 2px solid #007bff;
+    border-bottom: 2px solid var(--primary-color);
     padding-bottom: 10px;
 }
 
+/* ====== LINKI ====== */
 a {
-    color: #007bff;
+    color: var(--primary-color);
     text-decoration: none;
-    transition: color 0.3s;
+    transition: color 0.3s, transform 0.2s;
 }
 
 a:hover {
-    color: #0056b3;
+    color: var(--primary-dark);
+    transform: scale(1.05);
 }
 
-/* STYLIZACJA FORMULARZA */
+/* ====== FORMULARZE ====== */
 .form-container {
     background: #ffffff;
     padding: 30px 40px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 450px;
+    max-width: 500px;
+    margin: 20px auto;
+    animation: fadeIn 0.5s ease-in-out;
 }
 
 .form-group {
@@ -45,52 +67,81 @@ a:hover {
 .form-group label {
     display: block;
     margin-bottom: 8px;
-    font-weight: bold;
+    font-weight: 600;
     color: #555;
 }
 
-.form-group input[type="text"] {
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="date"] {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Ważne, aby padding nie powiększał pola */
-    transition: border-color 0.3s;
+    border-radius: 6px;
+    box-sizing: border-box;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    font-size: 15px;
 }
 
-.form-group input[type="text"]:focus {
-    border-color: #007bff;
+.form-group input:focus {
+    border-color: var(--primary-color);
     outline: none;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+    box-shadow: 0 0 6px rgba(0, 123, 255, 0.25);
 }
 
-/* STYLIZACJA PRZYCISKU */
-button[type="submit"] {
-    background-color: #28a745; /* Zielony kolor akcji */
+/* ====== PRZYCISKI ====== */
+button[type="submit"],
+.btn {
+    background-color: var(--secondary-color);
     color: white;
     padding: 12px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 600;
     width: 100%;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
-button[type="submit"]:hover {
-    background-color: #218838;
+button[type="submit"]:hover,
+.btn:hover {
+    background-color: var(--secondary-dark);
+    transform: translateY(-2px);
 }
 
-/* STYLIZACJA BŁĘDÓW WALIDACJI */
+/* ====== BŁĘDY WALIDACJI ====== */
 .validation-error {
-    color: #dc3545;
+    color: var(--danger-color);
     font-size: 14px;
     margin-top: 5px;
 }
 
-/* STYLIZACJA STOPKI */
+/* ====== STOPKA ====== */
 .back-link {
-    margin-top: 20px;
+    margin-top: 25px;
     font-size: 15px;
+    text-align: center;
+}
+
+/* ====== ANIMACJE ====== */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ====== RESPONSYWNOŚĆ ====== */
+@media (max-width: 600px) {
+    .form-container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 22px;
+    }
+
+    button[type="submit"] {
+        font-size: 14px;
+    }
 }
