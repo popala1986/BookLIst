@@ -1,8 +1,9 @@
 package pl.booklist.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pl.booklist.dto.BookDTO;
 import pl.booklist.service.BookService;
 
@@ -16,6 +17,7 @@ import java.util.List;
  * @author Paweł
  */
 @RestController
+@RequestMapping("/api/books")
 @Validated
 public class BookController {
 
@@ -51,4 +53,17 @@ public class BookController {
     public List<BookDTO> getUnownedBooks() {
         return bookService.findUnownedBooks();
     }
+
+
+
+    @PostMapping
+    public ResponseEntity<BookDTO> createBook(@RequestBody BookDTO bookDTO) {
+
+        BookDTO createdBook = bookService.addBook(bookDTO);
+        return new ResponseEntity<>(createdBook, HttpStatus.CREATED);
+    }
+
+
+
+
 }
