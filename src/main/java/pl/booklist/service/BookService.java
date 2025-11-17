@@ -19,11 +19,13 @@ import java.util.List;
 public class BookService {
 
     private final BookRepository bookRepository;
-    private final BookMapper bookMapper; //
+    private final BookMapper bookMapper;
+    private final CoverService coverService;
 
-    public BookService(BookRepository bookRepository, BookMapper bookMapper) {
+    public BookService(BookRepository bookRepository, BookMapper bookMapper, CoverService coverService) {
         this.bookRepository = bookRepository;
         this.bookMapper = bookMapper;
+        this.coverService = coverService;
     }
 
     public List<BookDTO> findAllBooks() {
@@ -45,5 +47,17 @@ public class BookService {
         return books.stream()
                 .map(bookMapper::toDto)
                 .toList();
+    }
+
+    public BookDTO addBook(BookDTO bookDTO) {
+        String coverUrl = coverService.fetchCoverUrl(bookDTO.getTitle(), bookDTO.getAuthor());
+
+        bookDTO.setCoverUrl(coverUrl);
+
+        var bookEntity = bookMapper.toEntity(bookDTO);
+
+        var savedBook = bookRepository.save(bookEntity);
+
+        return bookMapper.toDto(savedBook);
     }
 }
