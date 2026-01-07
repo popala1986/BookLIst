@@ -6,25 +6,45 @@
     <link rel="stylesheet" th:href="@{/css/styles.css}">
 </head>
 <body>
-<h1>Dodaj książkę do listy życzeń</h1>
+<div class="app-container">
+    <h1>Dodaj książkę do listy życzeń</h1>
 
-<form th:action="@{/add}" th:object="${newBook}" method="post">
+    <!-- Formularz w kontenerze -->
+    <form class="form-container" th:action="@{/add}" th:object="${newBook}" method="post">
 
-    <div>
-        <label for="title">Tytuł (EN):</label>
-        <input type="text" id="title" th:field="*{title}" required>
-        <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Błąd tytułu</div>
-    </div>
+        <!-- Pole: Tytuł -->
+        <div class="form-group">
+            <label for="title">Tytuł :</label>
+            <input type="text" id="title" th:field="*{title}" required
+                   placeholder="np. Robinson Crusoe">
+            <div class="validation-error"
+                 th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Błąd tytułu</div>
+        </div>
 
-    <div>
-        <label for="author">Autor (EN):</label>
-        <input type="text" id="author" th:field="*{author}" required>
-        <div th:if="${#fields.hasErrors('author')}" th:errors="*{author}">Błąd autora</div>
-    </div>
+        <!-- Pole: Autor -->
+        <div class="form-group">
+            <label for="author">Autor :</label>
+            <input type="text" id="author" th:field="*{author}" required
+                   placeholder="np. Daniel Defoe">
+            <div class="validation-error"
+                 th:if="${#fields.hasErrors('author')}" th:errors="*{author}">Błąd autora</div>
+        </div>
 
-    <button type="submit">Dodaj do listy życzeń (i pobierz okładkę)</button>
-</form>
+        <!-- Pole: URL okładki -->
+        <div class="form-group">
+            <label for="coverUrl">Adres obrazu :</label>
+            <input type="text" id="coverUrl" th:field="*{coverUrl}"
+                   placeholder="skopiuj i wklej adres obrazu (okładki książki) ">
+            <div class="validation-error"
+                 th:if="${#fields.hasErrors('coverUrl')}" th:errors="*{coverUrl}">Błąd URL</div>
+        </div>
 
-<p><a href="/">Powrót do strony głównej</a></p>
+        <!-- Przycisk -->
+        <button type="submit">Dodaj do listy życzeń (i pobierz okładkę)</button>
+    </form>
+
+    <!-- Link powrotu -->
+    <p class="back-link"><a href="/">Powrót do strony głównej</a></p>
+</div>
 </body>
 </html>

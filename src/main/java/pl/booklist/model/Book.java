@@ -3,10 +3,7 @@ package pl.booklist.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import org.hibernate.validator.constraints.URL;
-
 import java.util.Objects;
-
 
 /**
  * Represent a book entity in the BookList application.
@@ -51,7 +48,7 @@ public class Book {
     /**
      * URL of the book's cover image, typically fetched from Google Books API.
      */
-    @Column(name = "cover_url")
+    @Column(name = "cover_url", length = 10000)
     private String coverUrl;
 
     /**

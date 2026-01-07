@@ -8,6 +8,9 @@ import pl.booklist.repository.BookRepository;
 
 import java.util.List;
 
+
+
+
 /**
  * Service layer for managing {@link Book} entities.
  * Provides business logic and access to book-related operations.
@@ -50,14 +53,31 @@ public class BookService {
     }
 
     public BookDTO addBook(BookDTO bookDTO) {
-        String coverUrl = coverService.fetchCoverUrl(bookDTO.getTitle(), bookDTO.getAuthor());
+        String coverUrl = bookDTO.getCoverUrl();
+
+        if (coverUrl == null || coverUrl.isBlank()) {
+            coverUrl = coverService.fetchCoverUrl(bookDTO.getTitle(), bookDTO.getAuthor());
+        }
+
+        if (coverUrl == null || coverUrl.isBlank()) {
+            coverUrl = "default-cover.jpg";
+        }
 
         bookDTO.setCoverUrl(coverUrl);
 
         var bookEntity = bookMapper.toEntity(bookDTO);
-
         var savedBook = bookRepository.save(bookEntity);
 
         return bookMapper.toDto(savedBook);
     }
+
+    public void deleteById(Long id) {
+        bookRepository.deleteById(id);
+    }
+    public void markAsOwned(Long id) {
+        Book book = bookRepository.findById(id) .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono książki o ID: " + id));
+        book.setOwned(true);
+        bookRepository.save(book);
+    }
+
 }

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.booklist.dto.BookDTO;
@@ -49,4 +50,18 @@ public class MvcBookController {
         }
         return "redirect:/";
     }
+    @PostMapping("/books/delete/{id}")
+    public String deleteBook(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        bookService.deleteById(id);
+        redirectAttributes.addFlashAttribute("message", "Książka została usunięta.");
+        return "redirect:/";
+    }
+
+    @PostMapping("/books/moveToOwned/{id}")
+    public String moveToOwned(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        bookService.markAsOwned(id);
+        redirectAttributes.addFlashAttribute("message", "Książka została dodana do kolekcji.");
+        return "redirect:/";
+    }
+
 }

@@ -62,8 +62,4 @@ public class BookController {
         BookDTO createdBook = bookService.addBook(bookDTO);
         return new ResponseEntity<>(createdBook, HttpStatus.CREATED);
     }
-
-
-
-
 }
