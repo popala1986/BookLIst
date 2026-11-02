@@ -149,4 +149,35 @@ class BookServiceTest {
         assertThatThrownBy(() -> bookService.deleteById(99L, USER)).isInstanceOf(BookNotFoundException.class);
         verify(bookRepository, never()).delete(any());
     }
+
+    @Test
+    @DisplayName("refreshCover saves a newly found cover")
+    void refreshCover_savesFoundCover() {
+        Book book = new Book(5L, "Robinson Kruzoe", "Defoe", false, CoverService.DEFAULT_COVER_URL);
+        when(bookRepository.findByIdAndOwnerUsername(5L, USER)).thenReturn(Optional.of(book));
+        when(coverService.fetchCoverUrl("Robinson Kruzoe", "Defoe")).thenReturn("https://covers.openlibrary.org/b/id/1-L.jpg");
+
+        assertThat(bookService.refreshCover(5L, USER)).isTrue();
+        assertThat(book.getCoverUrl()).isEqualTo("https://covers.openlibrary.org/b/id/1-L.jpg");
+    }
+
+    @Test
+    @DisplayName("refreshCover keeps the book unchanged when nothing is found")
+    void refreshCover_nothingFound() {
+        Book book = new Book(5L, "Nieznana", "Nikt", false, CoverService.DEFAULT_COVER_URL);
+        when(bookRepository.findByIdAndOwnerUsername(5L, USER)).thenReturn(Optional.of(book));
+        when(coverService.fetchCoverUrl("Nieznana", "Nikt")).thenReturn(CoverService.DEFAULT_COVER_URL);
+
+        assertThat(bookService.refreshCover(5L, USER)).isFalse();
+        assertThat(book.getCoverUrl()).isEqualTo(CoverService.DEFAULT_COVER_URL);
+    }
+
+    @Test
+    @DisplayName("refreshCover rejects another user's book")
+    void refreshCover_otherUsersBook() {
+        when(bookRepository.findByIdAndOwnerUsername(9L, USER)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> bookService.refreshCover(9L, USER)).isInstanceOf(BookNotFoundException.class);
+        verifyNoInteractions(coverService);
+    }
 }

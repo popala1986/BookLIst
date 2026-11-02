@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.booklist.dto.BookDTO;
 import pl.booklist.exception.BookNotFoundException;
@@ -76,5 +77,22 @@ public class MvcBookController {
             redirectAttributes.addFlashAttribute("error", "Nie znaleziono tej książki.");
         }
         return "redirect:/#collection";
+    }
+
+    @PostMapping("/books/refreshCover/{id}")
+    public String refreshCover(@PathVariable Long id,
+                               @RequestParam(defaultValue = "collection") String tab,
+                               Principal principal,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            if (bookService.refreshCover(id, principal.getName())) {
+                redirectAttributes.addFlashAttribute("message", "Znaleziono okładkę.");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "Nadal nie udało się znaleźć okładki. Możesz wkleić jej adres przy dodawaniu książki.");
+            }
+        } catch (BookNotFoundException e) {
+            redirectAttributes.addFlashAttribute("error", "Nie znaleziono tej książki.");
+        }
+        return "wishlist".equals(tab) ? "redirect:/#wishlist" : "redirect:/#collection";
     }
 }

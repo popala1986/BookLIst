@@ -98,7 +98,7 @@ cd ~/booklist && docker compose pull && docker compose up -d
 
 ## Klucz Google Books (okładki)
 
-Bez klucza Google często odrzuca zapytania (limit jest wspólny dla wielu serwerów), a wtedy książka dostaje okładkę domyślną. Klucz jest darmowy:
+Klucz jest opcjonalny. Bez niego Google zwykle odrzuca zapytania, a wtedy aplikacja szuka okładki w Open Library, które klucza nie wymaga. Jeśli i tam jej nie ma, książka dostaje okładkę domyślną i przycisk „Szukaj okładki”, żeby spróbować później. Z kluczem Google znajduje więcej okładek, w tym polskich wydań. Klucz jest darmowy, ale Google Cloud wymaga włączonej weryfikacji dwuetapowej na koncie Google:
 
 1. Wejdź na https://console.cloud.google.com/ i utwórz projekt.
 2. „APIs & Services” → „Library” → włącz **Books API**.
