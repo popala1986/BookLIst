@@ -2,12 +2,15 @@
 # Pierwsze uruchomienie BookList na serwerze z home-app (Caddy + Postgres w sieci home-app_default).
 # Uruchom na serwerze:
 #   bash <(curl -fsSL https://raw.githubusercontent.com/popala1986/BookLIst/master/deploy/setup-server.sh)
-# Skrypt: zakłada bazę i użytkownika w Postgresie, generuje hasła, tworzy ~/booklist/.env i uruchamia aplikację.
+# Skrypt: zakłada bazę i użytkownika w Postgresie, generuje hasła, tworzy ~/booklist/.env, uruchamia aplikację
+# i kładzie blok Caddy (deploy/booklist.caddy) do ~/home-app/caddy-sites/.
 # Można go uruchomić ponownie: gdy ~/booklist/.env już istnieje, tylko pobiera nową wersję i restartuje.
 set -euo pipefail
 
 APP_DIR="$HOME/booklist"
 HOME_APP_ENV="$HOME/home-app/.env"
+# Folder, z którego Caddy w home-app wczytuje bloki innych aplikacji (import /etc/caddy/sites/*.caddy).
+CADDY_SITES_DIR="${CADDY_SITES_DIR:-$HOME/home-app/caddy-sites}"
 RAW="https://raw.githubusercontent.com/popala1986/BookLIst/master"
 
 mkdir -p "$APP_DIR"
@@ -63,10 +66,19 @@ echo "== Pobieram i uruchamiam BookList =="
 docker compose pull
 docker compose up -d
 
+echo "== Konfiguracja Caddy (book.homeduty.pl) =="
+mkdir -p "$CADDY_SITES_DIR"
+curl -fsSL "$RAW/deploy/booklist.caddy" -o "$CADDY_SITES_DIR/booklist.caddy"
+if docker exec caddy caddy reload --config /etc/caddy/Caddyfile >/dev/null 2>&1; then
+  echo "Caddy przeładowany."
+else
+  echo "Nie udało się przeładować Caddy (może jeszcze nie ma wersji home-app z folderem caddy-sites). Plik jest gotowy w $CADDY_SITES_DIR."
+fi
+
 echo "== Czekam na start aplikacji =="
 for _ in $(seq 1 30); do
   if docker logs booklist 2>&1 | grep -q "Started BookListApplication"; then
-    echo "BookList działa. Po dodaniu bloku do Caddyfile otwórz https://book.homeduty.pl"
+    echo "BookList działa: https://book.homeduty.pl"
     exit 0
   fi
   sleep 3

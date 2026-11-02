@@ -1,0 +1,7 @@
+# Blok Caddy dla BookList. Skrypt deploy/setup-server.sh kopiuje ten plik do ~/home-app/caddy-sites/,
+# a Caddy z home-app wczytuje go przez "import /etc/caddy/sites/*.caddy".
+# {$DOMAIN} to domena z .env home-app (homeduty.pl), więc adres to book.homeduty.pl.
+book.{$DOMAIN} {
+	encode gzip
+	reverse_proxy booklist:8080
+}

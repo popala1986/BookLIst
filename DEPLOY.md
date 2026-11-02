@@ -17,7 +17,7 @@ Po zmergowaniu do `master` i zakończeniu GitHub Actions wystarczą trzy rzeczy:
    ```bash
    bash <(curl -fsSL https://raw.githubusercontent.com/popala1986/BookLIst/master/deploy/setup-server.sh)
    ```
-3. Blok w Caddyfile home-app (punkt 5 niżej).
+3. Nic więcej: skrypt sam dokłada blok Caddy (punkt 5 niżej).
 
 Poniżej te same kroki opisane ręcznie.
 
@@ -74,22 +74,25 @@ docker logs -f booklist     # poczekaj na "Started BookListApplication"
 
 ## 5. Caddy
 
-Caddy z home-app czyta `infra/caddy/Caddyfile.server` z repozytorium `java-kafka-home-app`. Na jego końcu dopisz blok:
+Caddy z home-app wczytuje dodatkowe bloki z folderu `~/home-app/caddy-sites/` (`import /etc/caddy/sites/*.caddy`). Konfiguracja BookList jest w tym repo, w `deploy/booklist.caddy`. Skrypt `setup-server.sh` kopiuje ją tam i przeładowuje Caddy, więc repo home-app nic nie wie o BookList.
 
-```caddyfile
-book.{$DOMAIN} {
-	encode gzip
-	reverse_proxy booklist:8080
-}
-```
-
-Po zmergowaniu do `main` CD w home-app uruchomi `deploy.sh`, który sam utworzy Caddy od nowa, gdy Caddyfile się zmieni. Ręcznie na serwerze:
+Ręcznie:
 
 ```bash
-cd ~/home-app && git pull --ff-only && docker compose up -d --force-recreate caddy
+mkdir -p ~/home-app/caddy-sites
+curl -fsSL https://raw.githubusercontent.com/popala1986/BookLIst/master/deploy/booklist.caddy -o ~/home-app/caddy-sites/booklist.caddy
+docker exec caddy caddy reload --config /etc/caddy/Caddyfile
 ```
 
 Caddy sam pobierze certyfikat Let's Encrypt, gdy rekord DNS już działa. Wejdź na `https://book.homeduty.pl` i zaloguj się danymi z `APP_ADMIN_USERNAME` / `APP_ADMIN_PASSWORD`.
+
+## Aktualizacja
+
+Po zmergowaniu zmian na `master` i zakończeniu GitHub Actions uruchom skrypt jeszcze raz (pobierze nową wersję i zrestartuje aplikację) albo:
+
+```bash
+cd ~/booklist && docker compose pull && docker compose up -d
+```
 
 ## Konta użytkowników
 
@@ -106,14 +109,6 @@ Bez klucza Google często odrzuca zapytania (limit jest wspólny dla wielu serwe
 2. „APIs & Services” → „Library” → włącz **Books API**.
 3. „Credentials” → „Create credentials” → „API key”. Najlepiej ogranicz klucz do Books API.
 4. Wpisz go w `.env` jako `GOOGLE_BOOKS_API_KEY` i zrób `docker compose up -d`.
-
-## Aktualizacja
-
-Po zmergowaniu zmian na `master` i zakończeniu GitHub Actions:
-
-```bash
-cd ~/booklist && docker compose pull && docker compose up -d
-```
 
 ## Kopia zapasowa
 
