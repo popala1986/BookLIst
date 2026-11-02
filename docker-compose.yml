@@ -1,0 +1,16 @@
+# Runs BookList next to an existing Caddy + Postgres setup.
+# Caddy reaches the app by its container name: reverse_proxy booklist:8080
+services:
+  booklist:
+    image: ghcr.io/popala1986/booklist:latest
+    container_name: booklist
+    restart: unless-stopped
+    env_file: .env
+    mem_limit: 512m
+    networks:
+      - shared
+
+networks:
+  shared:
+    external: true
+    name: ${DOCKER_NETWORK}
