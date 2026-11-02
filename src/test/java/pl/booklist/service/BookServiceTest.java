@@ -7,24 +7,32 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import pl.booklist.dto.BookDTO;
-import pl.booklist.mapper.BookMapper;
-import pl.booklist.model.Book;
-import pl.booklist.repository.BookRepository;
-
 import pl.booklist.exception.BookNotFoundException;
+import pl.booklist.mapper.BookMapper;
+import pl.booklist.model.AppUser;
+import pl.booklist.model.Book;
+import pl.booklist.model.Role;
+import pl.booklist.repository.BookRepository;
+import pl.booklist.repository.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BookServiceTest {
 
+    private static final String USER = "anna";
+
     @Mock
     private BookRepository bookRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private BookMapper bookMapper;
@@ -38,106 +46,54 @@ class BookServiceTest {
     private final Book bookEntity1 = new Book(1L, "Wiedźmin", "Sapkowski", true, "url1");
     private final Book bookEntity2 = new Book(2L, "Lód", "Dukaj", false, "url2");
 
-    private final BookDTO bookDto1 = new BookDTO(1L, "Wiedźmin DTO", "Sapkowski DTO", true, "url1");
-    private final BookDTO bookDto2 = new BookDTO(2L, "Lód DTO", "Dukaj DTO", false, "url2");
+    private final BookDTO bookDto1 = new BookDTO(1L, "Wiedźmin", "Sapkowski", true, "url1");
+    private final BookDTO bookDto2 = new BookDTO(2L, "Lód", "Dukaj", false, "url2");
+
+    private final AppUser anna = new AppUser(USER, "{noop}x", Role.USER);
 
     @Test
-    @DisplayName("should find all books and map them to DTOs")
-    void findAllBooks_shouldReturnMappedDTOList() {
-        //given
-        List<Book> entityList = List.of(bookEntity1, bookEntity2);
+    @DisplayName("should list all books of the user")
+    void findAllBooks_shouldReturnUsersBooks() {
+        List<Book> entities = List.of(bookEntity1, bookEntity2);
+        when(bookRepository.findByOwnerUsernameOrderByTitleAsc(USER)).thenReturn(entities);
+        when(bookMapper.toDtoList(entities)).thenReturn(List.of(bookDto1, bookDto2));
 
-        when(bookRepository.findAll()).thenReturn(entityList);
-
-        when(bookMapper.toDto(bookEntity1)).thenReturn(bookDto1);
-        when(bookMapper.toDto(bookEntity2)).thenReturn(bookDto2);
-
-        // WHEN
-        List<BookDTO> result = bookService.findAllBooks();
-
-        // THEN
-        assertThat(result).isNotNull();
-        assertThat(result).hasSize(2);
-        assertThat(result).containsExactly(bookDto1, bookDto2);
-
-        verify(bookRepository, times(1)).findAll();
-
-        verify(bookMapper, times(1)).toDto(bookEntity1);
-        verify(bookMapper, times(1)).toDto(bookEntity2);
+        assertThat(bookService.findAllBooks(USER)).containsExactly(bookDto1, bookDto2);
     }
 
     @Test
-    @DisplayName("should find unowned books and map them to DTOs")
-    void findUnownedBooks_shouldReturnOnlyUnownedMappedDTOs() {
-        // GIVEN
-        List<Book> unownedEntityList = List.of(bookEntity2);
+    @DisplayName("should list owned books of the user")
+    void findOwnedBooks_shouldQueryOwned() {
+        when(bookRepository.findByOwnerUsernameAndOwnedOrderByTitleAsc(USER, true)).thenReturn(List.of(bookEntity1));
+        when(bookMapper.toDtoList(List.of(bookEntity1))).thenReturn(List.of(bookDto1));
 
-        when(bookRepository.findByOwnedFalse()).thenReturn(unownedEntityList);
-        when(bookMapper.toDto(bookEntity2)).thenReturn(bookDto2);
-
-        // WHEN
-        List<BookDTO> result = bookService.findUnownedBooks();
-
-        // THEN
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).isOwned()).isFalse();
-
-        verify(bookRepository, times(1)).findByOwnedFalse();
-        verify(bookMapper, times(1)).toDto(bookEntity2);
+        assertThat(bookService.findOwnedBooks(USER)).containsExactly(bookDto1);
     }
 
     @Test
-    @DisplayName("should find owned books and map them to DTOs")
-    void findOwnedBooks_shouldReturnOnlyOwnedMappedDTOs() {
-        // GIVEN
-        List<Book> ownedEntityList = List.of(bookEntity1);
+    @DisplayName("should list the wishlist of the user")
+    void findUnownedBooks_shouldQueryUnowned() {
+        when(bookRepository.findByOwnerUsernameAndOwnedOrderByTitleAsc(USER, false)).thenReturn(List.of(bookEntity2));
+        when(bookMapper.toDtoList(List.of(bookEntity2))).thenReturn(List.of(bookDto2));
 
-        when(bookRepository.findByOwnedTrue()).thenReturn(ownedEntityList);
-        when(bookMapper.toDto(bookEntity1)).thenReturn(bookDto1);
-
-        // WHEN
-        List<BookDTO> result = bookService.findOwnedBooks();
-
-        // THEN
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).isOwned()).isTrue();
-        assertThat(result).containsExactly(bookDto1);
-
-        verify(bookRepository, times(1)).findByOwnedTrue();
-        verify(bookMapper, times(1)).toDto(bookEntity1);
+        assertThat(bookService.findUnownedBooks(USER)).containsExactly(bookDto2);
     }
 
     @Test
-    @DisplayName("should return an empty list when no books are found")
-    void findAllBooks_shouldReturnEmptyListWhenRepositoryIsEmpty() {
-        // GIVEN
-        List<Book> emptyList = List.of();
-        when(bookRepository.findAll()).thenReturn(emptyList);
-
-        // WHEN
-        List<BookDTO> result = bookService.findAllBooks();
-
-        // THEN
-        assertThat(result).isNotNull();
-        assertThat(result).isEmpty();
-
-        verify(bookRepository, times(1)).findAll();
-
-        verify(bookMapper, never()).toDto(any(Book.class));
-    }
-
-    @Test
-    @DisplayName("should fetch a cover when none is given")
+    @DisplayName("should fetch a cover when none is given and assign the book to the user")
     void addBook_shouldFetchCoverWhenMissing() {
         BookDTO input = new BookDTO("Lód", "Dukaj", false, null);
+        Book entity = new Book(null, "Lód", "Dukaj", false, null);
+        when(userRepository.findByUsernameIgnoreCase(USER)).thenReturn(Optional.of(anna));
         when(coverService.fetchCoverUrl("Lód", "Dukaj")).thenReturn("https://cover");
-        when(bookMapper.toEntity(input)).thenReturn(bookEntity2);
-        when(bookRepository.save(bookEntity2)).thenReturn(bookEntity2);
-        when(bookMapper.toDto(bookEntity2)).thenReturn(bookDto2);
+        when(bookMapper.toEntity(input)).thenReturn(entity);
+        when(bookRepository.save(entity)).thenReturn(entity);
+        when(bookMapper.toDto(entity)).thenReturn(bookDto2);
 
-        BookDTO result = bookService.addBook(input);
+        BookDTO result = bookService.addBook(input, USER);
 
         assertThat(input.getCoverUrl()).isEqualTo("https://cover");
+        assertThat(entity.getOwner()).isSameAs(anna);
         assertThat(result).isEqualTo(bookDto2);
     }
 
@@ -145,42 +101,52 @@ class BookServiceTest {
     @DisplayName("should not call the cover service when a cover is given")
     void addBook_shouldKeepGivenCover() {
         BookDTO input = new BookDTO("Lód", "Dukaj", false, "https://my-cover");
-        when(bookMapper.toEntity(input)).thenReturn(bookEntity2);
-        when(bookRepository.save(bookEntity2)).thenReturn(bookEntity2);
-        when(bookMapper.toDto(bookEntity2)).thenReturn(bookDto2);
+        Book entity = new Book(null, "Lód", "Dukaj", false, "https://my-cover");
+        when(userRepository.findByUsernameIgnoreCase(USER)).thenReturn(Optional.of(anna));
+        when(bookMapper.toEntity(input)).thenReturn(entity);
+        when(bookRepository.save(entity)).thenReturn(entity);
 
-        bookService.addBook(input);
+        bookService.addBook(input, USER);
 
         verifyNoInteractions(coverService);
         assertThat(input.getCoverUrl()).isEqualTo("https://my-cover");
     }
 
     @Test
-    @DisplayName("should mark a book as owned")
+    @DisplayName("should mark the user's book as owned")
     void markAsOwned_shouldSetOwnedFlag() {
         Book book = new Book(2L, "Lód", "Dukaj", false, "url2");
-        when(bookRepository.findById(2L)).thenReturn(Optional.of(book));
+        when(bookRepository.findByIdAndOwnerUsername(2L, USER)).thenReturn(Optional.of(book));
 
-        bookService.markAsOwned(2L);
+        bookService.markAsOwned(2L, USER);
 
         assertThat(book.isOwned()).isTrue();
-        verify(bookRepository).save(book);
     }
 
     @Test
-    @DisplayName("should throw when marking a missing book as owned")
-    void markAsOwned_shouldThrowWhenMissing() {
-        when(bookRepository.findById(99L)).thenReturn(Optional.empty());
+    @DisplayName("should throw when the book does not exist or belongs to someone else")
+    void markAsOwned_shouldThrowWhenNotUsersBook() {
+        when(bookRepository.findByIdAndOwnerUsername(99L, USER)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> bookService.markAsOwned(99L)).isInstanceOf(BookNotFoundException.class);
+        assertThatThrownBy(() -> bookService.markAsOwned(99L, USER)).isInstanceOf(BookNotFoundException.class);
     }
 
     @Test
-    @DisplayName("should throw when deleting a missing book")
-    void deleteById_shouldThrowWhenMissing() {
-        when(bookRepository.existsById(99L)).thenReturn(false);
+    @DisplayName("should delete the user's book")
+    void deleteById_shouldDeleteUsersBook() {
+        when(bookRepository.findByIdAndOwnerUsername(1L, USER)).thenReturn(Optional.of(bookEntity1));
 
-        assertThatThrownBy(() -> bookService.deleteById(99L)).isInstanceOf(BookNotFoundException.class);
-        verify(bookRepository, never()).deleteById(any());
+        bookService.deleteById(1L, USER);
+
+        verify(bookRepository).delete(bookEntity1);
+    }
+
+    @Test
+    @DisplayName("should not delete a book that is not the user's")
+    void deleteById_shouldThrowWhenNotUsersBook() {
+        when(bookRepository.findByIdAndOwnerUsername(99L, USER)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> bookService.deleteById(99L, USER)).isInstanceOf(BookNotFoundException.class);
+        verify(bookRepository, never()).delete(any());
     }
 }

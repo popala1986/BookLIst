@@ -1,6 +1,7 @@
 package pl.booklist.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.util.Objects;
@@ -22,15 +23,15 @@ public class BookDTO {
     /**
      * Title of the book. Cannot be blank and must not exceed 50 characters.
      */
-    @NotBlank
-    @Size(max = 50)
+    @NotBlank(message = "Podaj tytuł")
+    @Size(max = 50, message = "Tytuł może mieć najwyżej 50 znaków")
     private String title;
 
     /**
      * Author of the book. Cannot be blank and must not exceed 100 characters.
      */
-    @NotBlank
-    @Size(max = 100)
+    @NotBlank(message = "Podaj autora")
+    @Size(max = 100, message = "Autor może mieć najwyżej 100 znaków")
     private String author;
 
     /**
@@ -41,6 +42,8 @@ public class BookDTO {
     /**
      * URL of the book's cover image.
      */
+    @Size(max = 2000, message = "Adres okładki jest za długi")
+    @Pattern(regexp = "^$|^https?://.*", message = "Adres okładki musi zaczynać się od http:// lub https://")
     private String coverUrl;
 
     /**

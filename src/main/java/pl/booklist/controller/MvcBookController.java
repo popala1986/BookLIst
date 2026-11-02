@@ -13,9 +13,11 @@ import pl.booklist.dto.BookDTO;
 import pl.booklist.exception.BookNotFoundException;
 import pl.booklist.service.BookService;
 
+import java.security.Principal;
+
 /**
- * Controller for handling Thymeleaf views (pages).
- * Handles adding books to the wishlist and displaying the main book lists.
+ * Controller for the Thymeleaf pages: the book lists and the add-book form.
+ * Every action works on the books of the logged-in user.
  */
 @Controller
 public class MvcBookController {
@@ -27,9 +29,9 @@ public class MvcBookController {
     }
 
     @GetMapping("/")
-    public String home(Model model) {
-        model.addAttribute("ownedBooks", bookService.findOwnedBooks());
-        model.addAttribute("wishlistBooks", bookService.findUnownedBooks());
+    public String home(Model model, Principal principal) {
+        model.addAttribute("ownedBooks", bookService.findOwnedBooks(principal.getName()));
+        model.addAttribute("wishlistBooks", bookService.findUnownedBooks(principal.getName()));
         return "index";
     }
 
@@ -42,36 +44,37 @@ public class MvcBookController {
     @PostMapping("/add")
     public String addBookToWishlist(@Valid @ModelAttribute("newBook") BookDTO bookDTO,
                                     BindingResult bindingResult,
+                                    Principal principal,
                                     RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             return "book-add";
         }
         bookDTO.setOwned(false);
-        BookDTO saved = bookService.addBook(bookDTO);
+        BookDTO saved = bookService.addBook(bookDTO, principal.getName());
 
-        redirectAttributes.addFlashAttribute("message", "Książka '" + saved.getTitle() + "' dodana do listy życzeń!");
-        return "redirect:/";
+        redirectAttributes.addFlashAttribute("message", "Książka „" + saved.getTitle() + "” dodana do listy życzeń!");
+        return "redirect:/#wishlist";
     }
 
     @PostMapping("/books/delete/{id}")
-    public String deleteBook(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String deleteBook(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
         try {
-            bookService.deleteById(id);
+            bookService.deleteById(id, principal.getName());
             redirectAttributes.addFlashAttribute("message", "Książka została usunięta.");
         } catch (BookNotFoundException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Nie znaleziono tej książki.");
         }
         return "redirect:/";
     }
 
     @PostMapping("/books/moveToOwned/{id}")
-    public String moveToOwned(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    public String moveToOwned(@PathVariable Long id, Principal principal, RedirectAttributes redirectAttributes) {
         try {
-            bookService.markAsOwned(id);
+            bookService.markAsOwned(id, principal.getName());
             redirectAttributes.addFlashAttribute("message", "Książka została dodana do kolekcji.");
         } catch (BookNotFoundException e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Nie znaleziono tej książki.");
         }
-        return "redirect:/";
+        return "redirect:/#collection";
     }
 }

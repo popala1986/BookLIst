@@ -5,32 +5,45 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import pl.booklist.service.UserService;
+
+import java.util.UUID;
 
 /**
- * Security configuration. The application has a single owner account whose
- * credentials come from the {@code app.admin.username} and {@code app.admin.password}
- * properties (in production: the {@code APP_ADMIN_USERNAME} and {@code APP_ADMIN_PASSWORD}
- * environment variables).
- * <p>
- * The web UI uses a login form; the REST API under {@code /api/**} uses HTTP Basic
- * and has CSRF protection disabled, since it is not used from a browser session.
+ * Security configuration.
+ * <ul>
+ *     <li>Web UI: custom login page at {@code /login}, registration at {@code /register}
+ *     (can be switched off with {@code app.registration.enabled=false}), "remember me" for 30 days.</li>
+ *     <li>{@code /admin/**}: only the single administrator account ({@code app.admin.username}).</li>
+ *     <li>REST API under {@code /api/**}: HTTP Basic with the same accounts, no CSRF.</li>
+ * </ul>
  */
 @Configuration
 public class SecurityConfig {
 
+    private static final int REMEMBER_ME_SECONDS = 30 * 24 * 60 * 60;
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   UserService userService,
+                                                   @Value("${app.remember-me-key:}") String rememberMeKey) throws Exception {
+        String key = rememberMeKey.isBlank() ? UUID.randomUUID().toString() : rememberMeKey;
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/images/**", "/login", "/error").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/favicon.svg",
+                                "/login", "/register", "/error").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
-                .formLogin(Customizer.withDefaults())
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .defaultSuccessUrl("/", false))
+                .rememberMe(remember -> remember
+                        .key(key)
+                        .userDetailsService(userService)
+                        .tokenValiditySeconds(REMEMBER_ME_SECONDS))
                 .httpBasic(Customizer.withDefaults())
                 .logout(logout -> logout.logoutSuccessUrl("/login?logout"))
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"));
@@ -40,19 +53,5 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-    }
-
-    @Bean
-    public UserDetailsService userDetailsService(
-            @Value("${app.admin.username}") String username,
-            @Value("${app.admin.password}") String password,
-            PasswordEncoder passwordEncoder) {
-        if (username.isBlank() || password.isBlank()) {
-            throw new IllegalStateException("app.admin.username and app.admin.password must be set");
-        }
-        return new InMemoryUserDetailsManager(User.withUsername(username)
-                .password(passwordEncoder.encode(password))
-                .roles("ADMIN")
-                .build());
     }
 }

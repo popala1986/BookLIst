@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Załóż konto')}"></head>
+<body class="auth-page">
+<main class="auth-wrap">
+    <a class="brand brand-lg" th:href="@{/}">
+        <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5a1.5 1.5 0 0 0 0 3H20v0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4.5v15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>BookList</span>
+    </a>
+
+    <section class="card auth-card">
+        <h1>Załóż konto</h1>
+
+        <div th:unless="${registrationEnabled}">
+            <p class="muted">Rejestracja nowych kont jest wyłączona.</p>
+            <a class="btn btn-ghost btn-block" th:href="@{/login}">Wróć do logowania</a>
+        </div>
+
+        <form th:if="${registrationEnabled}" th:action="@{/register}" th:object="${form}" method="post" class="form" novalidate>
+            <div class="field" th:classappend="${#fields.hasErrors('username')} ? 'has-error'">
+                <label for="username">Nazwa użytkownika</label>
+                <input type="text" id="username" th:field="*{username}" required autofocus autocomplete="username"
+                       minlength="3" maxlength="50">
+                <p class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Błąd</p>
+            </div>
+            <div class="field" th:classappend="${#fields.hasErrors('password')} ? 'has-error'">
+                <label for="password">Hasło</label>
+                <input type="password" id="password" th:field="*{password}" required autocomplete="new-password" minlength="8">
+                <p class="field-hint">Co najmniej 8 znaków.</p>
+                <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Błąd</p>
+            </div>
+            <div class="field" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'has-error'">
+                <label for="confirmPassword">Powtórz hasło</label>
+                <input type="password" id="confirmPassword" th:field="*{confirmPassword}" required autocomplete="new-password">
+                <p class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Błąd</p>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Załóż konto</button>
+        </form>
+
+        <p class="auth-switch">Masz już konto? <a th:href="@{/login}">Zaloguj się</a></p>
+    </section>
+</main>
+</body>
+</html>

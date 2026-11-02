@@ -78,6 +78,22 @@ cd ~/home-app && git pull --ff-only && docker compose up -d --force-recreate cad
 
 Caddy sam pobierze certyfikat Let's Encrypt, gdy rekord DNS już działa. Wejdź na `https://book.homeduty.pl` i zaloguj się danymi z `APP_ADMIN_USERNAME` / `APP_ADMIN_PASSWORD`.
 
+## Konta użytkowników
+
+- **Administrator** jest jeden. Aplikacja zakłada go przy pierwszym starcie z `APP_ADMIN_USERNAME` i `APP_ADMIN_PASSWORD`. Hasło z `.env` jest użyte tylko wtedy, gdy konta jeszcze nie ma, więc po pierwszym starcie możesz je z `.env` usunąć. Administrator widzi link „Panel admina” z listą kont i liczbą książek. Jeśli zmienisz `APP_ADMIN_USERNAME` na nazwę innego istniejącego konta, to ono stanie się administratorem, a poprzednie straci uprawnienia.
+- **Pozostali** zakładają konta sami na stronie „Załóż konto”. Każdy widzi tylko swoje książki.
+- Rejestrację wyłączysz, ustawiając `APP_REGISTRATION_ENABLED=false` i restartując kontener (`docker compose up -d`).
+- `APP_REMEMBER_ME_KEY` (wygeneruj `openssl rand -hex 32`) sprawia, że opcja „Nie wylogowuj mnie” działa także po restarcie aplikacji.
+
+## Klucz Google Books (okładki)
+
+Bez klucza Google często odrzuca zapytania (limit jest wspólny dla wielu serwerów), a wtedy książka dostaje okładkę domyślną. Klucz jest darmowy:
+
+1. Wejdź na https://console.cloud.google.com/ i utwórz projekt.
+2. „APIs & Services” → „Library” → włącz **Books API**.
+3. „Credentials” → „Create credentials” → „API key”. Najlepiej ogranicz klucz do Books API.
+4. Wpisz go w `.env` jako `GOOGLE_BOOKS_API_KEY` i zrób `docker compose up -d`.
+
 ## Aktualizacja
 
 Po zmergowaniu zmian na `master` i zakończeniu GitHub Actions:
@@ -98,4 +114,4 @@ Kontener ma limit 512 MB RAM (`mem_limit` w `docker-compose.yml`), a Java używa
 
 ## Lokalnie (bez Dockera)
 
-Skopiuj `src/main/resources/application-example.properties` do `application.properties`, uzupełnij dane MySQL i login, a potem `./mvnw spring-boot:run`.
+Skopiuj `src/main/resources/application-example.properties` do `application.properties`, uzupełnij dane MySQL i konto administratora, a potem `./mvnw spring-boot:run`. Książki dodane przed wprowadzeniem kont zostaną przypisane administratorowi przy pierwszym starcie.

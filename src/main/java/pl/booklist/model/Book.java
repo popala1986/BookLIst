@@ -52,6 +52,13 @@ public class Book {
     private String coverUrl;
 
     /**
+     * The user this book belongs to.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private AppUser owner;
+
+    /**
      * Constructs a new Book instance with the specified title, author, and ownership status.
      *
      * @param id the unique identifier of the book.
@@ -103,6 +110,14 @@ public class Book {
 
     public void setCoverUrl(String coverUrl) {
         this.coverUrl = coverUrl;
+    }
+
+    public AppUser getOwner() {
+        return owner;
+    }
+
+    public void setOwner(AppUser owner) {
+        this.owner = owner;
     }
 
     public boolean isOwned() {

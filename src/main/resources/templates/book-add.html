@@ -1,50 +1,63 @@
 <!DOCTYPE html>
 <html lang="pl" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Dodaj książkę</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('Dodaj książkę')}"></head>
 <body>
-<div class="app-container">
-    <h1>Dodaj książkę do listy życzeń</h1>
+<header th:replace="~{fragments/layout :: header}"></header>
 
-    <!-- Formularz w kontenerze -->
-    <form class="form-container" th:action="@{/add}" th:object="${newBook}" method="post">
+<main class="container page">
+    <a class="back-link" th:href="@{/}">← Wróć do biblioteki</a>
 
-        <!-- Pole: Tytuł -->
-        <div class="form-group">
-            <label for="title">Tytuł :</label>
-            <input type="text" id="title" th:field="*{title}" required
-                   placeholder="np. Robinson Crusoe">
-            <div class="validation-error"
-                 th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Błąd tytułu</div>
-        </div>
+    <div class="add-layout">
+        <section class="card">
+            <h1>Dodaj książkę do listy życzeń</h1>
+            <p class="muted">Wystarczy tytuł i autor. Jeśli nie podasz okładki, poszukamy jej w Google Books.</p>
 
-        <!-- Pole: Autor -->
-        <div class="form-group">
-            <label for="author">Autor :</label>
-            <input type="text" id="author" th:field="*{author}" required
-                   placeholder="np. Daniel Defoe">
-            <div class="validation-error"
-                 th:if="${#fields.hasErrors('author')}" th:errors="*{author}">Błąd autora</div>
-        </div>
+            <form th:action="@{/add}" th:object="${newBook}" method="post" class="form" id="add-book-form" novalidate>
+                <div class="field" th:classappend="${#fields.hasErrors('title')} ? 'has-error'">
+                    <label for="title">Tytuł</label>
+                    <input type="text" id="title" th:field="*{title}" required maxlength="50"
+                           placeholder="np. Robinson Crusoe" autofocus data-preview="title">
+                    <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">Błąd</p>
+                </div>
 
-        <!-- Pole: URL okładki -->
-        <div class="form-group">
-            <label for="coverUrl">Adres obrazu :</label>
-            <input type="text" id="coverUrl" th:field="*{coverUrl}"
-                   placeholder="skopiuj i wklej adres obrazu (okładki książki) ">
-            <div class="validation-error"
-                 th:if="${#fields.hasErrors('coverUrl')}" th:errors="*{coverUrl}">Błąd URL</div>
-        </div>
+                <div class="field" th:classappend="${#fields.hasErrors('author')} ? 'has-error'">
+                    <label for="author">Autor</label>
+                    <input type="text" id="author" th:field="*{author}" required maxlength="100"
+                           placeholder="np. Daniel Defoe" data-preview="author">
+                    <p class="field-error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}">Błąd</p>
+                </div>
 
-        <!-- Przycisk -->
-        <button type="submit">Dodaj do listy życzeń (i pobierz okładkę)</button>
-    </form>
+                <div class="field" th:classappend="${#fields.hasErrors('coverUrl')} ? 'has-error'">
+                    <label for="coverUrl">Adres okładki <span class="optional">(opcjonalnie)</span></label>
+                    <input type="url" id="coverUrl" th:field="*{coverUrl}"
+                           placeholder="https://… (zostaw puste, aby znaleźć automatycznie)" data-preview="cover">
+                    <p class="field-hint">Wklej link do obrazka, jeśli automatycznie znaleziona okładka Ci nie pasuje.</p>
+                    <p class="field-error" th:if="${#fields.hasErrors('coverUrl')}" th:errors="*{coverUrl}">Błąd</p>
+                </div>
 
-    <!-- Link powrotu -->
-    <p class="back-link"><a href="/">Powrót do strony głównej</a></p>
-</div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" data-loading-text="Szukam okładki…">Dodaj do listy życzeń</button>
+                    <a class="btn btn-ghost" th:href="@{/}">Anuluj</a>
+                </div>
+            </form>
+        </section>
+
+        <aside class="preview" aria-label="Podgląd">
+            <p class="preview-label">Podgląd</p>
+            <article class="book-card book-card-preview">
+                <div class="cover">
+                    <img id="preview-cover" th:src="@{/images/default-cover.jpg}" alt="Podgląd okładki"
+                         data-fallback="/images/default-cover.jpg" data-default="/images/default-cover.jpg">
+                </div>
+                <div class="book-info">
+                    <h3 class="book-title" id="preview-title" data-empty="Tytuł książki">Tytuł książki</h3>
+                    <p class="book-author" id="preview-author" data-empty="Autor">Autor</p>
+                </div>
+            </article>
+        </aside>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
 </body>
 </html>
