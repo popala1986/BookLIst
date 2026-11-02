@@ -48,6 +48,11 @@
                     <p class="book-author" th:text="${book.author}">Autor</p>
                 </div>
                 <div class="book-actions">
+                    <form th:if="${book.coverUrl == '/images/default-cover.jpg'}"
+                          th:action="@{/books/refreshCover/{id}(id=${book.id})}" method="post">
+                        <input type="hidden" name="tab" value="collection">
+                        <button type="submit" class="btn btn-ghost btn-sm btn-block">↻ Szukaj okładki</button>
+                    </form>
                     <form th:action="@{/books/delete/{id}(id=${book.id})}" method="post"
                           th:attr="data-confirm='Usunąć „' + ${book.title} + '” z kolekcji?'">
                         <button type="submit" class="btn btn-danger-ghost btn-sm btn-block">Usuń</button>
@@ -80,6 +85,11 @@
                 <div class="book-actions">
                     <form th:action="@{/books/moveToOwned/{id}(id=${book.id})}" method="post">
                         <button type="submit" class="btn btn-success btn-sm btn-block">✓ Mam ją</button>
+                    </form>
+                    <form th:if="${book.coverUrl == '/images/default-cover.jpg'}"
+                          th:action="@{/books/refreshCover/{id}(id=${book.id})}" method="post">
+                        <input type="hidden" name="tab" value="wishlist">
+                        <button type="submit" class="btn btn-ghost btn-sm btn-block">↻ Szukaj okładki</button>
                     </form>
                     <form th:action="@{/books/delete/{id}(id=${book.id})}" method="post"
                           th:attr="data-confirm='Usunąć „' + ${book.title} + '” z listy życzeń?'">

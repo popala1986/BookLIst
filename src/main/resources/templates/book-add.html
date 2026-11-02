@@ -10,7 +10,7 @@
     <div class="add-layout">
         <section class="card">
             <h1>Dodaj książkę do listy życzeń</h1>
-            <p class="muted">Wystarczy tytuł i autor. Jeśli nie podasz okładki, poszukamy jej w Google Books.</p>
+            <p class="muted">Wystarczy tytuł i autor. Jeśli nie podasz okładki, poszukamy jej w Google Books i Open Library.</p>
 
             <form th:action="@{/add}" th:object="${newBook}" method="post" class="form" id="add-book-form" novalidate>
                 <div class="field" th:classappend="${#fields.hasErrors('title')} ? 'has-error'">

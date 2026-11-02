@@ -49,7 +49,7 @@ public class BookService {
 
     /**
      * Saves a new book for the user. When no cover URL is given, the cover is looked up
-     * in Google Books, falling back to the default cover.
+     * in Google Books and Open Library, falling back to the default cover.
      */
     @Transactional
     public BookDTO addBook(BookDTO bookDTO, String username) {
@@ -76,6 +76,22 @@ public class BookService {
     @Transactional
     public void markAsOwned(Long id, String username) {
         findOwnBook(id, username).setOwned(true);
+    }
+
+    /**
+     * Looks up the cover again, e.g. for a book that got the default cover when it was added.
+     *
+     * @return true when a real cover was found
+     */
+    @Transactional
+    public boolean refreshCover(Long id, String username) {
+        Book book = findOwnBook(id, username);
+        String coverUrl = coverService.fetchCoverUrl(book.getTitle(), book.getAuthor());
+        if (CoverService.DEFAULT_COVER_URL.equals(coverUrl)) {
+            return false;
+        }
+        book.setCoverUrl(coverUrl);
+        return true;
     }
 
     private Book findOwnBook(Long id, String username) {

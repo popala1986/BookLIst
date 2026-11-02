@@ -1,6 +1,6 @@
 # BookLIst
 
-Aplikacja do zarządzania własną kolekcją książek i listą życzeń. Okładki pobiera automatycznie z Google Books.
+Aplikacja do zarządzania własną kolekcją książek i listą życzeń. Okładki pobiera automatycznie z Google Books, a gdy tam ich nie ma, z Open Library.
 
 **Funkcje:** konta użytkowników (każdy widzi tylko swoje książki), jedno konto administratora z panelem, lista życzeń i kolekcja w zakładkach, wyszukiwarka, podgląd okładki przy dodawaniu, tryb jasny i ciemny, wersja na telefon.
 
