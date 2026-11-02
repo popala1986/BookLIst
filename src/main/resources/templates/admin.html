@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Panel admina')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header}"></header>
+
+<main class="container page">
+    <a class="back-link" th:href="@{/}">← Wróć do biblioteki</a>
+
+    <section class="page-head">
+        <div>
+            <h1>Panel administratora</h1>
+            <p class="muted">Przegląd kont i książek w aplikacji.</p>
+        </div>
+    </section>
+
+    <div class="stats">
+        <div class="stat"><span class="stat-value" th:text="${#lists.size(users)}">0</span><span class="stat-label">kont</span></div>
+        <div class="stat"><span class="stat-value" th:text="${totalOwned}">0</span><span class="stat-label">książek w kolekcjach</span></div>
+        <div class="stat"><span class="stat-value" th:text="${totalWishlist}">0</span><span class="stat-label">na listach życzeń</span></div>
+    </div>
+
+    <section class="card table-card">
+        <h2>Użytkownicy</h2>
+        <div class="table-scroll">
+            <table class="table">
+                <thead>
+                <tr><th>Nazwa</th><th>Rola</th><th>Założone</th><th class="num">Kolekcja</th><th class="num">Lista życzeń</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="u : ${users}">
+                    <td th:text="${u.username}">jan</td>
+                    <td><span class="badge" th:classappend="${u.role.name() == 'ADMIN'} ? 'badge-admin' : 'badge-user'"
+                              th:text="${u.role.name() == 'ADMIN'} ? 'Administrator' : 'Użytkownik'">Użytkownik</span></td>
+                    <td th:text="${#temporals.format(u.createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2026</td>
+                    <td class="num" th:text="${u.ownedBooks}">0</td>
+                    <td class="num" th:text="${u.wishlistBooks}">0</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

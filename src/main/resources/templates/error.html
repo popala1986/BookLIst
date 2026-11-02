@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Błąd')}"></head>
+<body class="auth-page">
+<main class="auth-wrap">
+    <section class="card auth-card center">
+        <p class="error-code" th:text="${status} ?: 'Ups'">404</p>
+        <h1 th:text="${status == 404} ? 'Nie ma takiej strony' : 'Coś poszło nie tak'">Coś poszło nie tak</h1>
+        <p class="muted">Spróbuj wrócić do biblioteki.</p>
+        <a class="btn btn-primary" th:href="@{/}">Wróć do biblioteki</a>
+    </section>
+</main>
+</body>
+</html>
