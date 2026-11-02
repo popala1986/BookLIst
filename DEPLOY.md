@@ -8,6 +8,19 @@ Ta instrukcja zakłada serwer, na którym już działają Docker, Caddy (porty 8
 - Na serwerze `docker compose pull && docker compose up -d` pobiera nową wersję.
 - Aplikacja startuje z profilem `prod` (`application-prod.properties`), a hasła bierze ze zmiennych w pliku `.env`.
 
+## Szybki start
+
+Po zmergowaniu do `master` i zakończeniu GitHub Actions wystarczą trzy rzeczy:
+
+1. Rekord DNS `book` w OVH (punkt 1 niżej).
+2. Na serwerze jedno polecenie, które zakłada bazę, generuje hasła, tworzy `.env` i uruchamia aplikację (zapyta o login i hasło administratora):
+   ```bash
+   bash <(curl -fsSL https://raw.githubusercontent.com/popala1986/BookLIst/master/deploy/setup-server.sh)
+   ```
+3. Blok w Caddyfile home-app (punkt 5 niżej).
+
+Poniżej te same kroki opisane ręcznie.
+
 ## 1. Domena i DNS
 
 Nie trzeba kupować nowej domeny: BookList może działać na subdomenie domeny, którą już masz, np. `book.homeduty.pl`. W panelu OVH (strefa DNS `homeduty.pl`) dodaj rekord:
