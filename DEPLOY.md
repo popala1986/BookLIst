@@ -83,11 +83,26 @@ Caddy sam pobierze certyfikat Let's Encrypt, gdy rekord DNS już działa. Wejdź
 
 ## Aktualizacja
 
-Po zmergowaniu zmian na `master` i zakończeniu GitHub Actions uruchom skrypt jeszcze raz (pobierze nową wersję i zrestartuje aplikację) albo:
+### Automatycznie (po włączeniu)
+
+Po każdym merge do `master` GitHub Actions buduje obraz, a potem łączy się z serwerem przez SSH i uruchamia `~/booklist/update.sh` (pobiera nową wersję i restartuje aplikację). Włączasz to raz:
+
+1. Na serwerze:
+   ```bash
+   bash <(curl -fsSL https://raw.githubusercontent.com/popala1986/BookLIst/master/deploy/enable-auto-deploy.sh)
+   ```
+   Skrypt zapisuje `~/booklist/update.sh`, tworzy osobny klucz SSH `~/.ssh/booklist_deploy` i dodaje go do `~/.ssh/authorized_keys` z ograniczeniem `restrict,command=...`, więc ten klucz może uruchomić tylko `update.sh` (bez konsoli i przekierowań).
+2. Skrypt wypisuje trzy wartości. Wklej je w https://github.com/popala1986/BookLIst/settings/secrets/actions jako sekrety `DEPLOY_TARGET`, `DEPLOY_KNOWN_HOSTS` i `DEPLOY_SSH_KEY`.
+
+Bez tych sekretów krok „deploy” w Actions jest pomijany. Wyłączenie: usuń sekrety albo linijkę z `booklist-deploy` w `~/.ssh/authorized_keys`.
+
+### Ręcznie
 
 ```bash
-cd ~/booklist && docker compose pull && docker compose up -d
+~/booklist/update.sh
 ```
+
+albo `cd ~/booklist && docker compose pull && docker compose up -d`.
 
 ## Konta użytkowników
 

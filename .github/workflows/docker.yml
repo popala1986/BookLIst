@@ -41,3 +41,26 @@ jobs:
           tags: |
             ghcr.io/popala1986/booklist:latest
             ghcr.io/popala1986/booklist:${{ github.sha }}
+
+  # Po zbudowaniu obrazu na master serwer sam pobiera nową wersję.
+  # Włączenie: deploy/enable-auto-deploy.sh na serwerze i trzy sekrety DEPLOY_* w ustawieniach repo.
+  deploy:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to server
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_TARGET: ${{ secrets.DEPLOY_TARGET }}
+        run: |
+          if [ -z "$DEPLOY_SSH_KEY" ] || [ -z "$DEPLOY_KNOWN_HOSTS" ] || [ -z "$DEPLOY_TARGET" ]; then
+            echo "Automatyczne wdrażanie nie jest włączone (brak sekretów DEPLOY_*). Pomijam."
+            exit 0
+          fi
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes "$DEPLOY_TARGET"
