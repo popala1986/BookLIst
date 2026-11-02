@@ -10,13 +10,13 @@ Ta instrukcja zakłada serwer, na którym już działają Docker, Caddy (porty 8
 
 ## 1. Domena i DNS
 
-Nie trzeba kupować nowej domeny: BookList może działać na subdomenie domeny, którą już masz, np. `ksiazki.homeduty.pl`. W panelu OVH (strefa DNS `homeduty.pl`) dodaj rekord:
+Nie trzeba kupować nowej domeny: BookList może działać na subdomenie domeny, którą już masz, np. `book.homeduty.pl`. W panelu OVH (strefa DNS `homeduty.pl`) dodaj rekord:
 
 | Typ | Nazwa | Wartość |
 |-----|-------|---------|
-| A   | `ksiazki` | to samo IPv4, na które wskazuje `homeduty.pl` |
+| A   | `book` | to samo IPv4, na które wskazuje `homeduty.pl` |
 
-Jeśli `homeduty.pl` ma rekord `AAAA`, dodaj też `AAAA` dla `ksiazki`. Jeśli wolisz osobną domenę, kup ją i ustaw rekord `A` tak samo. Propagacja zwykle trwa od kilku minut do godziny. Sprawdzisz ją poleceniem `dig +short ksiazki.homeduty.pl`.
+Jeśli `homeduty.pl` ma rekord `AAAA`, dodaj też `AAAA` dla `book`. Jeśli wolisz osobną domenę, kup ją i ustaw rekord `A` tak samo. Propagacja zwykle trwa od kilku minut do godziny. Sprawdzisz ją poleceniem `dig +short book.homeduty.pl`.
 
 ## 2. Baza danych w istniejącym Postgresie
 
@@ -64,7 +64,7 @@ docker logs -f booklist     # poczekaj na "Started BookListApplication"
 Caddy z home-app czyta `infra/caddy/Caddyfile.server` z repozytorium `java-kafka-home-app`. Na jego końcu dopisz blok:
 
 ```caddyfile
-ksiazki.{$DOMAIN} {
+book.{$DOMAIN} {
 	encode gzip
 	reverse_proxy booklist:8080
 }
@@ -76,7 +76,7 @@ Po zmergowaniu do `main` CD w home-app uruchomi `deploy.sh`, który sam utworzy 
 cd ~/home-app && git pull --ff-only && docker compose up -d --force-recreate caddy
 ```
 
-Caddy sam pobierze certyfikat Let's Encrypt, gdy rekord DNS już działa. Wejdź na `https://ksiazki.homeduty.pl` i zaloguj się danymi z `APP_ADMIN_USERNAME` / `APP_ADMIN_PASSWORD`.
+Caddy sam pobierze certyfikat Let's Encrypt, gdy rekord DNS już działa. Wejdź na `https://book.homeduty.pl` i zaloguj się danymi z `APP_ADMIN_USERNAME` / `APP_ADMIN_PASSWORD`.
 
 ## Aktualizacja
 
