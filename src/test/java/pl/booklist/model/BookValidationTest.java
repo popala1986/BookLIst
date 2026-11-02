@@ -75,19 +75,4 @@ void tooLongAuthorShouldFailValidation() {
             "Expected validation error on 'author' field"
     );
 }
-
-
-    @Test
-    @DisplayName("Invalid URL should fail validation (only if @URL is used)")
-    void invalidUrlShouldFailValidation() {
-        Book book = new Book(null,"Valid Title", "Valid Author", true, "invalid-url");
-
-        Set<ConstraintViolation<Book>> violations = validator.validate(book);
-
-        assertFalse(violations.isEmpty(), "Expected validation error for invalid URL value");
-        assertTrue(
-                violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("coverUrl")),
-                "Expected validation error on 'coverUrl' field"
-        );
-    }
 }

@@ -1,5 +1,6 @@
 package pl.booklist.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -7,11 +8,12 @@ import org.springframework.web.bind.annotation.*;
 import pl.booklist.dto.BookDTO;
 import pl.booklist.service.BookService;
 
+import java.security.Principal;
 import java.util.List;
 
 /**
  * REST controller for handling book-related HTTP requests.
- * Provides endpoints for retrieving book data.
+ * Provides endpoints for the books of the authenticated user (HTTP Basic).
  * Uses {@link BookService} to access book DTOs.
  *
  * @author Paweł
@@ -32,8 +34,8 @@ public class BookController {
      * @return a list of all {@link BookDTO} objects.
      */
     @GetMapping("/showAllBooks")
-    public List<BookDTO> getAllBooks() {
-        return bookService.findAllBooks();
+    public List<BookDTO> getAllBooks(Principal principal) {
+        return bookService.findAllBooks(principal.getName());
     }
 
     /**
@@ -41,8 +43,8 @@ public class BookController {
      * @return a list of owned {@link BookDTO} objects.
      */
     @GetMapping("/my-books")
-    public List<BookDTO> getOwnedBooks() {
-        return bookService.findOwnedBooks();
+    public List<BookDTO> getOwnedBooks(Principal principal) {
+        return bookService.findOwnedBooks(principal.getName());
     }
 
     /**
@@ -50,16 +52,25 @@ public class BookController {
      * @return a list of unowned {@link BookDTO} objects.
      */
     @GetMapping("/wishlist")
-    public List<BookDTO> getUnownedBooks() {
-        return bookService.findUnownedBooks();
+    public List<BookDTO> getUnownedBooks(Principal principal) {
+        return bookService.findUnownedBooks(principal.getName());
     }
 
 
 
     @PostMapping
-    public ResponseEntity<BookDTO> createBook(@RequestBody BookDTO bookDTO) {
-
-        BookDTO createdBook = bookService.addBook(bookDTO);
+    public ResponseEntity<BookDTO> createBook(@Valid @RequestBody BookDTO bookDTO, Principal principal) {
+        BookDTO createdBook = bookService.addBook(bookDTO, principal.getName());
         return new ResponseEntity<>(createdBook, HttpStatus.CREATED);
+    }
+
+    /**
+     * Handles DELETE request to remove a book.
+     * @param id the id of the book to delete
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id, Principal principal) {
+        bookService.deleteById(id, principal.getName());
+        return ResponseEntity.noContent().build();
     }
 }

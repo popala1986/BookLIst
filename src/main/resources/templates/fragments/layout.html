@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pl" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title th:text="${title} + ' · BookList'">BookList</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <script th:src="@{/js/app.js}" defer></script>
+</head>
+<body>
+
+<header th:fragment="header" class="site-header">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/}">
+            <svg class="brand-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5a1.5 1.5 0 0 0 0 3H20v0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4.5v15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span>BookList</span>
+        </a>
+        <nav class="header-nav" sec:authorize="isAuthenticated()">
+            <a class="btn btn-primary btn-sm" th:href="@{/add}" aria-label="Dodaj książkę">
+                <span aria-hidden="true">＋</span><span class="hide-sm"> Dodaj książkę</span>
+            </a>
+            <a class="btn btn-ghost btn-sm" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')"><span class="hide-sm">Panel admina</span><span class="show-sm">Admin</span></a>
+            <span class="user-chip" title="Zalogowany użytkownik">
+                <span class="avatar" aria-hidden="true" th:text="${#strings.toUpperCase(#strings.substring(#authentication.name, 0, 1))}">P</span>
+                <span class="user-name" sec:authentication="name">user</span>
+            </span>
+            <form th:action="@{/logout}" method="post" class="inline-form">
+                <button type="submit" class="btn btn-ghost btn-sm">Wyloguj</button>
+            </form>
+        </nav>
+    </div>
+</header>
+
+<div th:fragment="flash" class="flash-area">
+    <div th:if="${message}" class="alert alert-success" role="status" data-dismiss-after="5000">
+        <span th:text="${message}">Sukces</span>
+        <button type="button" class="alert-close" aria-label="Zamknij">×</button>
+    </div>
+    <div th:if="${error}" class="alert alert-error" role="alert">
+        <span th:text="${error}">Błąd</span>
+        <button type="button" class="alert-close" aria-label="Zamknij">×</button>
+    </div>
+</div>
+
+<footer th:fragment="footer" class="site-footer">
+    <div class="container">BookList · Twoja kolekcja i lista życzeń. Okładki z Google Books.</div>
+</footer>
+
+</body>
+</html>
