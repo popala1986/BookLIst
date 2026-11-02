@@ -5,7 +5,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
- * Data from the registration form.
+ * Data for a new account: from the administrator's "Dodaj użytkownika" form
+ * or from the registration form (when registration is on).
  */
 public class RegisterForm {
 

@@ -17,13 +17,16 @@ import pl.booklist.model.AppUser;
 import pl.booklist.model.Role;
 import pl.booklist.repository.BookRepository;
 import pl.booklist.repository.UserRepository;
+import pl.booklist.security.LoginAttemptService;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 
 /**
- * Registers users, keeps the single administrator account in place and loads users for Spring Security.
+ * Creates accounts, changes passwords, keeps the single administrator account in place
+ * and loads users for Spring Security.
  */
 @Service
 public class UserService implements UserDetailsService {
@@ -34,15 +37,18 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final PasswordEncoder passwordEncoder;
+    private final LoginAttemptService loginAttempts;
     private final String adminUsername;
     private final String adminPassword;
 
     public UserService(UserRepository userRepository, BookRepository bookRepository, PasswordEncoder passwordEncoder,
+                       LoginAttemptService loginAttempts,
                        @Value("${app.admin.username:}") String adminUsername,
                        @Value("${app.admin.password:}") String adminPassword) {
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
         this.passwordEncoder = passwordEncoder;
+        this.loginAttempts = loginAttempts;
         this.adminUsername = adminUsername.trim();
         this.adminPassword = adminPassword;
     }
@@ -85,7 +91,8 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * Creates a regular account. The administrator account cannot be registered through the form.
+     * Creates a regular account (by the administrator, or through the registration form when it is on).
+     * Nobody can take the administrator's username.
      */
     @Transactional
     public AppUser register(String username, String rawPassword) {
@@ -94,6 +101,39 @@ public class UserService implements UserDetailsService {
             throw new UsernameTakenException(name);
         }
         return userRepository.save(new AppUser(name, passwordEncoder.encode(rawPassword), Role.USER));
+    }
+
+    /**
+     * Changes the password of a logged-in user after checking the current one.
+     *
+     * @return false when the current password is wrong
+     */
+    @Transactional
+    public boolean changePassword(String username, String currentPassword, String newPassword) {
+        AppUser user = userRepository.findByUsernameIgnoreCase(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            return false;
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        logger.info("User {} changed their password", user.getUsername());
+        return true;
+    }
+
+    /**
+     * Sets a new password chosen by the administrator (e.g. when someone forgot theirs)
+     * and lifts a login lock, if there was one.
+     *
+     * @return the username, or empty when there is no such account
+     */
+    @Transactional
+    public Optional<String> setPassword(Long userId, String newPassword) {
+        return userRepository.findById(userId).map(user -> {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            loginAttempts.unblock(user.getUsername());
+            logger.info("Administrator set a new password for {}", user.getUsername());
+            return user.getUsername();
+        });
     }
 
     /**
@@ -117,6 +157,7 @@ public class UserService implements UserDetailsService {
         return User.withUsername(user.getUsername())
                 .password(user.getPassword())
                 .roles(user.getRole().name())
+                .accountLocked(loginAttempts.isBlocked(username, LoginAttemptService.currentClientIp()))
                 .build();
     }
 

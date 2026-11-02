@@ -16,7 +16,7 @@ import pl.booklist.exception.UsernameTakenException;
 import pl.booklist.service.UserService;
 
 /**
- * Login and registration pages.
+ * Login page and the optional public registration (off by default, accounts are added by the admin).
  */
 @Controller
 public class AuthController {
@@ -25,7 +25,7 @@ public class AuthController {
     private final boolean registrationEnabled;
 
     public AuthController(UserService userService,
-                          @Value("${app.registration.enabled:true}") boolean registrationEnabled) {
+                          @Value("${app.registration.enabled:false}") boolean registrationEnabled) {
         this.userService = userService;
         this.registrationEnabled = registrationEnabled;
     }

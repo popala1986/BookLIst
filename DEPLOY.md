@@ -107,8 +107,9 @@ albo `cd ~/booklist && docker compose pull && docker compose up -d`.
 ## Konta użytkowników
 
 - **Administrator** jest jeden. Aplikacja zakłada go przy pierwszym starcie z `APP_ADMIN_USERNAME` i `APP_ADMIN_PASSWORD`. Hasło z `.env` jest użyte tylko wtedy, gdy konta jeszcze nie ma, więc po pierwszym starcie możesz je z `.env` usunąć. Administrator widzi link „Panel admina” z listą kont i liczbą książek. Jeśli zmienisz `APP_ADMIN_USERNAME` na nazwę innego istniejącego konta, to ono stanie się administratorem, a poprzednie straci uprawnienia.
-- **Pozostali** zakładają konta sami na stronie „Załóż konto”. Każdy widzi tylko swoje książki.
-- Rejestrację wyłączysz, ustawiając `APP_REGISTRATION_ENABLED=false` i restartując kontener (`docker compose up -d`).
+- **Pozostałe konta** zakłada administrator w „Panel admina” → „Dodaj użytkownika”, z hasłem startowym. Każdy widzi tylko swoje książki i może zmienić hasło, klikając swoją nazwę u góry („Zmień hasło”). Jeśli ktoś zapomni hasła, administrator ustawia mu nowe w tabeli użytkowników („Ustaw”).
+- **Rejestracja** przez stronę „Załóż konto” jest domyślnie wyłączona. Włączysz ją, ustawiając w `.env` `APP_REGISTRATION_ENABLED=true` i restartując kontener (`docker compose up -d`).
+- **Blokada logowania**: po 5 błędnych hasłach dla tej samej nazwy z tego samego adresu IP logowanie jest zablokowane na 15 minut (także dla API). Blokada dotyczy tylko tego adresu, więc ktoś zgadujący hasło nie zablokuje właściciela konta. Administrator zdejmuje ją wcześniej, ustawiając nowe hasło. Restart aplikacji też ją kasuje.
 - `APP_REMEMBER_ME_KEY` (wygeneruj `openssl rand -hex 32`) sprawia, że opcja „Nie wylogowuj mnie” działa także po restarcie aplikacji.
 
 ## Klucz Google Books (okładki)
@@ -122,9 +123,30 @@ Klucz jest opcjonalny. Bez niego Google zwykle odrzuca zapytania, a wtedy aplika
 
 ## Kopia zapasowa
 
+Codzienną kopię włączasz raz, na serwerze:
+
 ```bash
-docker exec booklist-db pg_dump -U booklist booklist > booklist-$(date +%F).sql
+bash <(curl -fsSL https://raw.githubusercontent.com/popala1986/BookLIst/master/deploy/enable-backup.sh)
 ```
+
+Skrypt zapisuje `~/booklist/backup.sh`, dodaje go do crona (codziennie o 3:30) i od razu robi pierwszą kopię. Kopie są w `~/booklist/backups/booklist-RRRR-MM-DD-GGMM.sql.gz`, zostaje 14 najnowszych, a dziennik jest w `~/booklist/backups/backup.log`. Kopię na żądanie zrobisz poleceniem `~/booklist/backup.sh`.
+
+Kopie leżą na tym samym serwerze, więc chronią przed pomyłką (usunięta książka, zepsuta aktualizacja), ale nie przed awarią serwera. Co jakiś czas ściągnij najnowszą na swój komputer (PowerShell): `scp ubuntu@homeduty.pl:~/booklist/backups/<plik> .`
+
+### Przywracanie z kopii
+
+Zastępuje całą obecną bazę zawartością kopii:
+
+```bash
+cd ~/booklist
+ls -1t backups/                       # wybierz plik, np. booklist-2026-11-02-0330.sql.gz
+docker compose stop booklist          # aplikacja nie może pisać do bazy w trakcie
+docker exec booklist-db psql -U booklist -d booklist -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+gunzip -c backups/booklist-2026-11-02-0330.sql.gz | docker exec -i booklist-db psql -q -v ON_ERROR_STOP=1 -U booklist -d booklist >/dev/null
+docker compose start booklist
+```
+
+Wyłączenie kopii: `crontab -e` i usuń linijkę z `booklist/backup.sh`.
 
 ## Zasoby
 
