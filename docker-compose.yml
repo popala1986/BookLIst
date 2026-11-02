@@ -1,5 +1,6 @@
-# Runs BookList next to an existing Caddy + Postgres setup.
-# Caddy reaches the app by its container name: reverse_proxy booklist:8080
+# BookList with its own PostgreSQL database.
+# The only shared thing is the Docker network with Caddy, which reaches the app as booklist:8080.
+# The database is on BookList's private network and is not visible to other containers.
 services:
   booklist:
     image: ghcr.io/popala1986/booklist:latest
@@ -7,8 +8,35 @@ services:
     restart: unless-stopped
     env_file: .env
     mem_limit: 512m
+    depends_on:
+      booklist-db:
+        condition: service_healthy
     networks:
+      - default
       - shared
+
+  booklist-db:
+    image: postgres:17-alpine
+    container_name: booklist-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: booklist
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    command: ["postgres", "-c", "shared_buffers=32MB", "-c", "max_connections=30"]
+    mem_limit: 256m
+    volumes:
+      - booklist-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d booklist"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - default
+
+volumes:
+  booklist-db-data:
 
 networks:
   shared:

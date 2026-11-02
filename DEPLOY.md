@@ -1,6 +1,6 @@
 # Wdrożenie BookList na serwer
 
-Ta instrukcja zakłada serwer, na którym już działają Docker, Caddy (porty 80/443) i PostgreSQL w kontenerze `postgres`. BookList dołącza do tej samej sieci Dockera, korzysta z istniejącego Postgresa (osobna baza i użytkownik), a Caddy kieruje do niego ruch z nowej domeny i sam wystawia certyfikat HTTPS.
+Ta instrukcja zakłada serwer, na którym już działają Docker i Caddy (porty 80/443). BookList ma własną bazę PostgreSQL w osobnym kontenerze `booklist-db`, więc nie zależy od baz innych aplikacji. Jedyne, co dzieli z innymi, to Caddy: kieruje ruch z domeny do BookList i sam wystawia certyfikat HTTPS.
 
 ## Jak to działa
 
@@ -13,7 +13,7 @@ Ta instrukcja zakłada serwer, na którym już działają Docker, Caddy (porty 8
 Po zmergowaniu do `master` i zakończeniu GitHub Actions wystarczą trzy rzeczy:
 
 1. Rekord DNS `book` w OVH (punkt 1 niżej).
-2. Na serwerze jedno polecenie, które zakłada bazę, generuje hasła, tworzy `.env` i uruchamia aplikację (zapyta o login i hasło administratora):
+2. Na serwerze jedno polecenie, które generuje hasła, tworzy `.env` i uruchamia aplikację razem z jej bazą (zapyta o login i hasło administratora):
    ```bash
    bash <(curl -fsSL https://raw.githubusercontent.com/popala1986/BookLIst/master/deploy/setup-server.sh)
    ```
@@ -31,20 +31,15 @@ Nie trzeba kupować nowej domeny: BookList może działać na subdomenie domeny,
 
 Jeśli `homeduty.pl` ma rekord `AAAA`, dodaj też `AAAA` dla `book`. Jeśli wolisz osobną domenę, kup ją i ustaw rekord `A` tak samo. Propagacja zwykle trwa od kilku minut do godziny. Sprawdzisz ją poleceniem `dig +short book.homeduty.pl`.
 
-## 2. Baza danych w istniejącym Postgresie
+## 2. Baza danych
 
-Administrator Postgresa w home-app to `homeapp` (zmienna `POSTGRES_USER` w `~/home-app/.env`). Wygeneruj hasło (`openssl rand -hex 24`) i załóż bazę:
+BookList ma własny kontener `booklist-db` (PostgreSQL 17) z danymi w wolumenie `booklist_booklist-db-data`. Baza powstaje sama przy pierwszym starcie z `DB_USERNAME` i `DB_PASSWORD` z `.env`, a tabele tworzy aplikacja. Kontener bazy jest tylko w prywatnej sieci BookList, więc inne aplikacje go nie widzą.
 
-```bash
-docker exec -it postgres psql -U homeapp -d postgres -c "CREATE USER booklist WITH PASSWORD 'WYGENEROWANE_HASLO';"
-docker exec -it postgres psql -U homeapp -d postgres -c "CREATE DATABASE booklist OWNER booklist;"
-```
-
-Tabele utworzy aplikacja przy pierwszym starcie.
+Jeśli BookList używał wcześniej bazy `booklist` we wspólnym kontenerze `postgres`, skrypt `setup-server.sh` przy pierwszym uruchomieniu nowej wersji sam przenosi książki do `booklist-db`. Zostawia przy tym kopię w `~/booklist/booklist-przed-przeniesieniem-*.sql`, a starej bazy nie rusza. Usuwasz ją ręcznie, gdy sprawdzisz, że wszystko jest na miejscu (komendę podaje skrypt).
 
 ## 3. Sieć Dockera
 
-Caddy i Postgres z home-app są w sieci `home-app_default`. BookList dołącza do niej (to domyślna wartość `DOCKER_NETWORK` w `.env.example`), więc widzi je pod nazwami `caddy` i `postgres`.
+Caddy jest w sieci `home-app_default`. BookList dołącza do niej (to domyślna wartość `DOCKER_NETWORK` w `.env.example`), żeby Caddy widział go jako `booklist:8080`. Baza zostaje w prywatnej sieci `booklist_default`.
 
 ## 4. Uruchomienie aplikacji
 
@@ -54,7 +49,7 @@ Na serwerze:
 mkdir -p ~/booklist && cd ~/booklist
 curl -fsSLO https://raw.githubusercontent.com/popala1986/BookLIst/master/docker-compose.yml
 curl -fsSL  https://raw.githubusercontent.com/popala1986/BookLIst/master/.env.example -o .env
-nano .env        # uzupełnij hasła i DOCKER_NETWORK
+nano .env        # uzupełnij hasła (DB_PASSWORD: openssl rand -hex 24) i DOCKER_NETWORK
 chmod 600 .env
 ```
 
@@ -113,12 +108,12 @@ Bez klucza Google często odrzuca zapytania (limit jest wspólny dla wielu serwe
 ## Kopia zapasowa
 
 ```bash
-docker exec postgres pg_dump -U booklist booklist > booklist-$(date +%F).sql
+docker exec booklist-db pg_dump -U booklist booklist > booklist-$(date +%F).sql
 ```
 
 ## Zasoby
 
-Kontener ma limit 512 MB RAM (`mem_limit` w `docker-compose.yml`), a Java używa do 75% tego limitu. Przy obecnym obciążeniu serwera to bezpieczna wartość.
+Aplikacja ma limit 512 MB RAM, a Java używa do 75% tego limitu. Baza ma limit 256 MB i ustawienia na małe zużycie (`shared_buffers=32MB`), w praktyce zajmuje ok. 40–60 MB. Limity są w `docker-compose.yml`.
 
 ## Lokalnie (bez Dockera)
 
