@@ -15,7 +15,7 @@ public class CoverService {
 
     private static final Logger logger = LoggerFactory.getLogger(CoverService.class);
 
-    private static final String DEFAULT_COVER_URL = "/images/default-cover.jpg";
+    public static final String DEFAULT_COVER_URL = "/images/default-cover.jpg";
 
     private final RestTemplate restTemplate;
 
@@ -40,7 +40,7 @@ public class CoverService {
                     JsonNode imageLinks = volumeInfo.get("imageLinks");
 
                     if (imageLinks != null && imageLinks.has("thumbnail")) {
-                        String thumbnailUrl = imageLinks.get("thumbnail").asText();
+                        String thumbnailUrl = imageLinks.get("thumbnail").asText().replaceFirst("^http://", "https://");
                         logger.info("Pobrano okładkę dla książki: {} - {}", title, author);
                         return thumbnailUrl;
                     }

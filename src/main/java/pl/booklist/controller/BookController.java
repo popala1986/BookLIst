@@ -1,5 +1,6 @@
 package pl.booklist.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -57,9 +58,19 @@ public class BookController {
 
 
     @PostMapping
-    public ResponseEntity<BookDTO> createBook(@RequestBody BookDTO bookDTO) {
+    public ResponseEntity<BookDTO> createBook(@Valid @RequestBody BookDTO bookDTO) {
 
         BookDTO createdBook = bookService.addBook(bookDTO);
         return new ResponseEntity<>(createdBook, HttpStatus.CREATED);
+    }
+
+    /**
+     * Handles DELETE request to remove a book.
+     * @param id the id of the book to delete
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
+        bookService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

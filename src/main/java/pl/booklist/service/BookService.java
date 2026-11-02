@@ -2,6 +2,7 @@ package pl.booklist.service;
 
 import org.springframework.stereotype.Service;
 import pl.booklist.dto.BookDTO;
+import pl.booklist.exception.BookNotFoundException;
 import pl.booklist.mapper.BookMapper;
 import pl.booklist.model.Book;
 import pl.booklist.repository.BookRepository;
@@ -60,7 +61,7 @@ public class BookService {
         }
 
         if (coverUrl == null || coverUrl.isBlank()) {
-            coverUrl = "default-cover.jpg";
+            coverUrl = CoverService.DEFAULT_COVER_URL;
         }
 
         bookDTO.setCoverUrl(coverUrl);
@@ -72,10 +73,14 @@ public class BookService {
     }
 
     public void deleteById(Long id) {
+        if (!bookRepository.existsById(id)) {
+            throw new BookNotFoundException(id);
+        }
         bookRepository.deleteById(id);
     }
+
     public void markAsOwned(Long id) {
-        Book book = bookRepository.findById(id) .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono książki o ID: " + id));
+        Book book = bookRepository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
         book.setOwned(true);
         bookRepository.save(book);
     }

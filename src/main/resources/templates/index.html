@@ -15,6 +15,8 @@
 <div class="app-container">
 <h1>Moja Biblioteka Książek</h1>
 
+<form th:action="@{/logout}" method="post" style="text-align:right;"><button type="submit" style="background:none; border:1px solid #888; color:inherit; padding:4px 10px; cursor:pointer;">Wyloguj</button></form>
+
 <div th:if="${message}" style="color: green; font-weight: bold;"><p th:text="${message}"></p></div>
 <div th:if="${error}" style="color: red; font-weight: bold;"><p th:text="${error}"></p></div>
 
@@ -31,7 +33,7 @@
         <h3 th:text="${book.title}">Tytuł</h3>
         <p th:text="${book.author}">Autor</p>
 
-        <form th:action="@{/books/delete/{id}(id=${book.id})}" method="post"> <button type="submit" style="margin-top:10px; background-color:#ff4d4d; color:white; border:none; padding:5px 10px; cursor:pointer;"> Usuń </button> </form>    </div>
+        <form th:action="@{/books/delete/{id}(id=${book.id})}" method="post" onsubmit="return confirm('Usunąć tę książkę z kolekcji?');"> <button type="submit" style="margin-top:10px; background-color:#ff4d4d; color:white; border:none; padding:5px 10px; cursor:pointer;"> Usuń </button> </form>    </div>
 </div>
 <div th:if="${#lists.isEmpty(ownedBooks)}"><p>Brak posiadanych książek.</p></div>
 
@@ -45,6 +47,7 @@
         <p th:text="${book.author}">Autor</p>
 
         <form th:action="@{/books/moveToOwned/{id}(id=${book.id})}" method="post"> <button type="submit" style="margin-top:10px; background-color:#4CAF50; color:white; border:none; padding:5px 10px; cursor:pointer;"> ➕ Dodaj do kolekcji </button> </form>
+        <form th:action="@{/books/delete/{id}(id=${book.id})}" method="post" onsubmit="return confirm('Usunąć tę książkę z listy życzeń?');"> <button type="submit" style="margin-top:10px; background-color:#ff4d4d; color:white; border:none; padding:5px 10px; cursor:pointer;"> Usuń </button> </form>
 
     </div>
 </div>

@@ -11,9 +11,13 @@ import pl.booklist.mapper.BookMapper;
 import pl.booklist.model.Book;
 import pl.booklist.repository.BookRepository;
 
+import pl.booklist.exception.BookNotFoundException;
+
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -24,6 +28,9 @@ class BookServiceTest {
 
     @Mock
     private BookMapper bookMapper;
+
+    @Mock
+    private CoverService coverService;
 
     @InjectMocks
     private BookService bookService;
@@ -117,5 +124,63 @@ class BookServiceTest {
         verify(bookRepository, times(1)).findAll();
 
         verify(bookMapper, never()).toDto(any(Book.class));
+    }
+
+    @Test
+    @DisplayName("should fetch a cover when none is given")
+    void addBook_shouldFetchCoverWhenMissing() {
+        BookDTO input = new BookDTO("Lód", "Dukaj", false, null);
+        when(coverService.fetchCoverUrl("Lód", "Dukaj")).thenReturn("https://cover");
+        when(bookMapper.toEntity(input)).thenReturn(bookEntity2);
+        when(bookRepository.save(bookEntity2)).thenReturn(bookEntity2);
+        when(bookMapper.toDto(bookEntity2)).thenReturn(bookDto2);
+
+        BookDTO result = bookService.addBook(input);
+
+        assertThat(input.getCoverUrl()).isEqualTo("https://cover");
+        assertThat(result).isEqualTo(bookDto2);
+    }
+
+    @Test
+    @DisplayName("should not call the cover service when a cover is given")
+    void addBook_shouldKeepGivenCover() {
+        BookDTO input = new BookDTO("Lód", "Dukaj", false, "https://my-cover");
+        when(bookMapper.toEntity(input)).thenReturn(bookEntity2);
+        when(bookRepository.save(bookEntity2)).thenReturn(bookEntity2);
+        when(bookMapper.toDto(bookEntity2)).thenReturn(bookDto2);
+
+        bookService.addBook(input);
+
+        verifyNoInteractions(coverService);
+        assertThat(input.getCoverUrl()).isEqualTo("https://my-cover");
+    }
+
+    @Test
+    @DisplayName("should mark a book as owned")
+    void markAsOwned_shouldSetOwnedFlag() {
+        Book book = new Book(2L, "Lód", "Dukaj", false, "url2");
+        when(bookRepository.findById(2L)).thenReturn(Optional.of(book));
+
+        bookService.markAsOwned(2L);
+
+        assertThat(book.isOwned()).isTrue();
+        verify(bookRepository).save(book);
+    }
+
+    @Test
+    @DisplayName("should throw when marking a missing book as owned")
+    void markAsOwned_shouldThrowWhenMissing() {
+        when(bookRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> bookService.markAsOwned(99L)).isInstanceOf(BookNotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("should throw when deleting a missing book")
+    void deleteById_shouldThrowWhenMissing() {
+        when(bookRepository.existsById(99L)).thenReturn(false);
+
+        assertThatThrownBy(() -> bookService.deleteById(99L)).isInstanceOf(BookNotFoundException.class);
+        verify(bookRepository, never()).deleteById(any());
     }
 }
