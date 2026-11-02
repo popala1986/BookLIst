@@ -13,6 +13,7 @@
         <p class="muted">Twoja kolekcja książek i lista życzeń w jednym miejscu.</p>
 
         <div th:if="${param.error}" class="alert alert-error" role="alert">Nieprawidłowa nazwa użytkownika lub hasło.</div>
+        <div th:if="${param.locked}" class="alert alert-error" role="alert">Za dużo nieudanych prób logowania. Spróbuj ponownie za 15 minut.</div>
         <div th:if="${param.logout}" class="alert alert-success" role="status">Wylogowano. Do zobaczenia!</div>
         <div th:if="${message}" class="alert alert-success" role="status" th:text="${message}">Konto utworzone</div>
 

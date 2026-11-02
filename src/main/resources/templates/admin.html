@@ -5,12 +5,13 @@
 <header th:replace="~{fragments/layout :: header}"></header>
 
 <main class="container page">
+    <div th:replace="~{fragments/layout :: flash}"></div>
     <a class="back-link" th:href="@{/}">← Wróć do biblioteki</a>
 
     <section class="page-head">
         <div>
             <h1>Panel administratora</h1>
-            <p class="muted">Przegląd kont i książek w aplikacji.</p>
+            <p class="muted">Konta zakładasz tutaj. Każdy użytkownik widzi tylko swoje książki.</p>
         </div>
     </section>
 
@@ -20,12 +21,39 @@
         <div class="stat"><span class="stat-value" th:text="${totalWishlist}">0</span><span class="stat-label">na listach życzeń</span></div>
     </div>
 
+    <div class="admin-grid">
+    <section class="card">
+        <h2>Dodaj użytkownika</h2>
+        <p class="muted">Wymyśl hasło startowe i przekaż je tej osobie. Po zalogowaniu zmieni je w „Zmień hasło” (kliknięcie w swoją nazwę u góry).</p>
+        <form th:action="@{/admin/users}" th:object="${form}" method="post" class="form add-user-form" novalidate>
+            <div class="field" th:classappend="${#fields.hasErrors('username')} ? 'has-error'">
+                <label for="username">Nazwa użytkownika</label>
+                <input type="text" id="username" th:field="*{username}" required autocomplete="off" minlength="3" maxlength="50">
+                <p class="field-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Błąd</p>
+            </div>
+            <div class="field" th:classappend="${#fields.hasErrors('password')} ? 'has-error'">
+                <label for="password">Hasło startowe</label>
+                <input type="password" id="password" th:field="*{password}" required autocomplete="new-password" minlength="8">
+                <p class="field-hint">Co najmniej 8 znaków.</p>
+                <p class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Błąd</p>
+            </div>
+            <div class="field" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'has-error'">
+                <label for="confirmPassword">Powtórz hasło</label>
+                <input type="password" id="confirmPassword" th:field="*{confirmPassword}" required autocomplete="new-password">
+                <p class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Błąd</p>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Dodaj użytkownika</button>
+            </div>
+        </form>
+    </section>
+
     <section class="card table-card">
         <h2>Użytkownicy</h2>
         <div class="table-scroll">
             <table class="table">
                 <thead>
-                <tr><th>Nazwa</th><th>Rola</th><th>Założone</th><th class="num">Kolekcja</th><th class="num">Lista życzeń</th></tr>
+                <tr><th>Nazwa</th><th>Rola</th><th>Założone</th><th class="num">Kolekcja</th><th class="num">Lista życzeń</th><th>Nowe hasło</th></tr>
                 </thead>
                 <tbody>
                 <tr th:each="u : ${users}">
@@ -35,11 +63,20 @@
                     <td th:text="${#temporals.format(u.createdAt, 'dd.MM.yyyy HH:mm')}">01.01.2026</td>
                     <td class="num" th:text="${u.ownedBooks}">0</td>
                     <td class="num" th:text="${u.wishlistBooks}">0</td>
+                    <td>
+                        <form th:action="@{/admin/users/{id}/password(id=${u.id})}" method="post" class="row-form">
+                            <input type="password" name="password" required minlength="8" autocomplete="new-password"
+                                   placeholder="min. 8 znaków" th:attr="aria-label='Nowe hasło dla ' + ${u.username}">
+                            <button type="submit" class="btn btn-ghost btn-sm">Ustaw</button>
+                        </form>
+                    </td>
                 </tr>
                 </tbody>
             </table>
         </div>
+        <p class="field-hint table-note">„Ustaw” zmienia hasło komuś, kto je zapomniał, i zdejmuje blokadę po błędnych próbach logowania.</p>
     </section>
+    </div>
 </main>
 
 <footer th:replace="~{fragments/layout :: footer}"></footer>

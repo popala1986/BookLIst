@@ -22,10 +22,10 @@
                 <span aria-hidden="true">＋</span><span class="hide-sm"> Dodaj książkę</span>
             </a>
             <a class="btn btn-ghost btn-sm" th:href="@{/admin}" sec:authorize="hasRole('ADMIN')"><span class="hide-sm">Panel admina</span><span class="show-sm">Admin</span></a>
-            <span class="user-chip" title="Zalogowany użytkownik">
+            <a class="user-chip" th:href="@{/account/password}" title="Moje konto: zmień hasło">
                 <span class="avatar" aria-hidden="true" th:text="${#strings.toUpperCase(#strings.substring(#authentication.name, 0, 1))}">P</span>
                 <span class="user-name" sec:authentication="name">user</span>
-            </span>
+            </a>
             <form th:action="@{/logout}" method="post" class="inline-form">
                 <button type="submit" class="btn btn-ghost btn-sm">Wyloguj</button>
             </form>
